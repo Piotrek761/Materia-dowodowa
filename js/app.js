@@ -257,59 +257,90 @@
                     submitBtn.disabled = true;
                     submitBtn.classList.add('loading');
 
-                    // Simulate submission
-                    setTimeout(function () {
-                        var fileName = fileInput.files.length > 0 ? fileInput.files[0].name : 'Brak pliku';
-                        var container = document.getElementById('dynamic-verdicts');
-                        var emptyMsg = document.getElementById('empty-verdicts-msg');
-                        if (emptyMsg) emptyMsg.remove();
+                    // Wczytaj plik i wyślij przez API
+                    var file = fileInput.files[0];
+                    var reader = new FileReader();
 
-                        var card = document.createElement('div');
-                        card.className = 'card';
-                        card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-
-                        var fileUrl = '#';
-                        var btnText = 'Zobacz orzeczenie';
-                        if (fileInput.files.length > 0) {
-                            fileUrl = URL.createObjectURL(fileInput.files[0]);
-                            btnText = 'Otwórz wysłany wyrok (' + fileName + ')';
-                        }
-
+                    reader.onload = function (ev) {
                         var presiding = document.getElementById('vPresiding');
                         var judge = document.getElementById('vJudge');
                         var member = document.getElementById('vMember');
 
-                        var panelHtml = '';
-                        if (presiding.value) panelHtml += '<p><strong>Przewodniczący:</strong> ' + escapeHtml(presiding.value) + '</p>';
-                        if (judge.value) panelHtml += '<p><strong>Sędzia sprawozdawca:</strong> ' + escapeHtml(judge.value) + '</p>';
-                        if (member.value) panelHtml += '<p><strong>Sędziowie:</strong> ' + escapeHtml(member.value) + '</p>';
+                        var verdictData = {
+                            title: title.value.trim(),
+                            court: court.value.trim(),
+                            desc: desc.value.trim(),
+                            presiding: presiding ? presiding.value.trim() : '',
+                            judge: judge ? judge.value.trim() : '',
+                            member: member ? member.value.trim() : '',
+                            fileName: file ? file.name : '',
+                            data: ev.target.result,
+                            size: file ? file.size : 0
+                        };
 
-                        card.innerHTML =
-                            '<h3>' + escapeHtml(title.value) + '</h3>' +
-                            '<p><strong>Organ orzekający:</strong> ' + escapeHtml(court.value) + '</p>' +
-                            panelHtml +
-                            '<p>' + escapeHtml(desc.value) + '</p>' +
-                            '<a href="' + fileUrl + '" target="_blank" class="btn-action" style="margin-top:15px;" rel="noopener">' +
-                            escapeHtml(btnText) + '</a>';
+                        // Wyślij przez API
+                        if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postVerdictAction) {
+                            GitHubAPI.postVerdictAction('create', verdictData, function(err, result) {
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('loading');
 
-                        container.prepend(card);
+                                if (err) {
+                                    showToast('Błąd wysyłania orzeczenia: ' + err, 'error', 5000);
+                                } else {
+                                    var serverCode = result && result.deleteCode ? result.deleteCode : 'BŁĄD-KODU';
+                                    showToast('Orzeczenie zostało opublikowane w bazie!', 'success', 5000);
+                                    showVerdictDeleteCodeDisplay(serverCode);
 
-                        // Reset form
-                        verdictForm.reset();
-                        document.querySelectorAll('.field-feedback').forEach(function (el) {
-                            el.textContent = '';
-                            el.className = 'field-feedback';
-                        });
-                        document.querySelectorAll('input.success, textarea.success').forEach(function (el) {
-                            el.classList.remove('success');
-                        });
+                                    // Zapisz kod
+                                    try {
+                                        var codes = JSON.parse(localStorage.getItem('md_verdict_codes') || '{}');
+                                        codes['last'] = serverCode;
+                                        localStorage.setItem('md_verdict_codes', JSON.stringify(codes));
+                                    } catch(e) {}
 
-                        submitBtn.disabled = false;
-                        submitBtn.classList.remove('loading');
+                                    loadVerdicts();
+                                }
 
-                        showToast('Orzeczenie zostało pomyślnie przesłane i dodane do bazy!', 'success', 5000);
-                        switchTab('orzecznictwo');
-                    }, 1200);
+                                verdictForm.reset();
+                                document.querySelectorAll('.field-feedback').forEach(function (el) {
+                                    el.textContent = ''; el.className = 'field-feedback';
+                                });
+                                document.querySelectorAll('input.success, textarea.success').forEach(function (el) {
+                                    el.classList.remove('success');
+                                });
+                                switchTab('orzecznictwo');
+                            });
+                        } else {
+                            // Fallback: localStorage
+                            var verdicts = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                            var localId = 'local_' + Date.now();
+                            verdictData.id = localId;
+                            verdictData.createdAt = new Date().toISOString();
+                            verdicts.unshift(verdictData);
+                            localStorage.setItem('md_verdicts', JSON.stringify(verdicts));
+
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('loading');
+                            showToast('Orzeczenie dodane lokalnie (tryb offline)', 'info', 5000);
+
+                            verdictForm.reset();
+                            document.querySelectorAll('.field-feedback').forEach(function (el) {
+                                el.textContent = ''; el.className = 'field-feedback';
+                            });
+                            document.querySelectorAll('input.success, textarea.success').forEach(function (el) {
+                                el.classList.remove('success');
+                            });
+                            loadVerdicts();
+                            switchTab('orzecznictwo');
+                        }
+                    };
+
+                    if (file) {
+                        reader.readAsDataURL(file);
+                    } else {
+                        // Bez pliku — wyślij tylko metadane
+                        reader.onload({ target: { result: '' } });
+                    }
                 });
             }
 
@@ -2162,6 +2193,198 @@
                 });
             }
         })();
+
+        // ============================================
+        // VERDICTS — load, render, delete
+        // ============================================
+        window.loadVerdicts = function() {
+            var container = document.getElementById('dynamic-verdicts');
+            if (!container) return;
+
+            if (typeof GitHubAPI !== 'undefined' && GitHubAPI.readVerdicts) {
+                GitHubAPI.readVerdicts(function(err, data) {
+                    if (!err && data && Array.isArray(data)) {
+                        window._verdicts = data;
+                        renderVerdicts(data);
+                    } else {
+                        var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                        window._verdicts = local;
+                        renderVerdicts(local);
+                    }
+                });
+            } else {
+                var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                window._verdicts = local;
+                renderVerdicts(local);
+            }
+        };
+
+        function renderVerdicts(verdicts) {
+            var container = document.getElementById('dynamic-verdicts');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (!verdicts || verdicts.length === 0) {
+                container.innerHTML = '<div class="empty-state" id="empty-verdicts-msg"><div class="empty-state-title">Brak orzeczeń</div><p>Żadne orzeczenie nie zostało jeszcze opublikowane. Skorzystaj z formularza powyżej, aby dodać własne!</p></div>';
+                return;
+            }
+
+            verdicts.forEach(function(v, idx) {
+                var date = new Date(v.createdAt || Date.now());
+                var dateStr = date.toLocaleDateString('pl-PL');
+                var fileUrl = v.data || '#';
+                var btnText = v.fileName ? 'Otwórz plik (' + escapeHtml(v.fileName) + ')' : 'Zobacz orzeczenie';
+
+                var card = document.createElement('div');
+                card.className = 'card';
+                card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+
+                var panelHtml = '';
+                if (v.presiding) panelHtml += '<p><strong>Przewodniczący:</strong> ' + escapeHtml(v.presiding) + '</p>';
+                if (v.judge) panelHtml += '<p><strong>Sędzia sprawozdawca:</strong> ' + escapeHtml(v.judge) + '</p>';
+                if (v.member) panelHtml += '<p><strong>Sędziowie:</strong> ' + escapeHtml(v.member) + '</p>';
+
+                card.innerHTML =
+                    '<h3>' + escapeHtml(v.title) + '</h3>' +
+                    '<p><strong>Organ orzekający:</strong> ' + escapeHtml(v.court) + '</p>' +
+                    panelHtml +
+                    '<p>' + escapeHtml(v.desc) + '</p>' +
+                    '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:12px;">Dodano: ' + dateStr + '</p>' +
+                    '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
+                        '<a href="' + fileUrl + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
+                            '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> ' + btnText + '</a>' +
+                        '<button class="verdict-del-btn" data-idx="' + idx + '" title="Usuń orzeczenie" style="background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x2716; Usuń</button>' +
+                    '</div>';
+
+                container.appendChild(card);
+            });
+
+            // Delete handlers
+            container.querySelectorAll('.verdict-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    showVerdictDeleteModal(idx);
+                });
+            });
+        }
+
+        function showVerdictDeleteCodeDisplay(code) {
+            var modal = document.getElementById('deleteCodeDisplayModal');
+            var display = document.getElementById('deleteCodeDisplay');
+            var closeBtn = document.getElementById('deleteCodeDisplayCloseBtn');
+            if (!modal || !display) return;
+            display.textContent = code;
+            modal.style.display = 'flex';
+            try {
+                var codes = JSON.parse(localStorage.getItem('md_verdict_codes') || '{}');
+                codes['last'] = code;
+                localStorage.setItem('md_verdict_codes', JSON.stringify(codes));
+            } catch(e) {}
+            function close() {
+                modal.style.display = 'none';
+                closeBtn.removeEventListener('click', close);
+            }
+            closeBtn.addEventListener('click', close);
+        }
+
+        function getVerdictCode(idx) {
+            var v = window._verdicts && window._verdicts[idx];
+            if (v && v.id) {
+                try {
+                    var codes = JSON.parse(localStorage.getItem('md_verdict_codes') || '{}');
+                    return codes[v.id] || codes['last'] || null;
+                } catch(e) { return null; }
+            }
+            try {
+                var codes = JSON.parse(localStorage.getItem('md_verdict_codes') || '{}');
+                return codes['last'] || null;
+            } catch(e) { return null; }
+        }
+
+        function showVerdictDeleteModal(idx) {
+            var allVerdicts = window._verdicts || [];
+            var v = allVerdicts[idx];
+            if (!v) {
+                showToast('Nie znaleziono orzeczenia.', 'error', 3000);
+                return;
+            }
+
+            var modal = document.getElementById('deleteCodeModal');
+            var input = document.getElementById('deleteCodeInput');
+            var feedback = document.getElementById('deleteCodeFeedback');
+            var confirmBtn = document.getElementById('deleteCodeConfirmBtn');
+            var cancelBtn = document.getElementById('deleteCodeCancelBtn');
+            var mTitle = document.getElementById('deleteModalTitle');
+            var mDesc = document.getElementById('deleteModalDesc');
+
+            if (!modal || !input) return;
+
+            mTitle.textContent = 'Usuń orzeczenie';
+            mDesc.textContent = 'Aby usunąć to orzeczenie, wpisz kod usuwania otrzymany przy publikacji.';
+
+            var savedCode = getVerdictCode(idx);
+            input.value = savedCode || '';
+            feedback.textContent = savedCode ? 'Kod automatycznie wczytany' : '';
+            feedback.className = savedCode ? 'field-feedback success' : 'field-feedback';
+            modal.style.display = 'flex';
+
+            function cleanup() {
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            }
+
+            function handleConfirm() {
+                var code = input.value.trim().toUpperCase();
+                if (!code) {
+                    feedback.textContent = 'Wpisz kod usuwania.';
+                    feedback.className = 'field-feedback error';
+                    return;
+                }
+
+                if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postVerdictAction) {
+                    GitHubAPI.postVerdictAction('delete', { idx: idx, code: code }, function(err) {
+                        cleanup();
+                        if (err) {
+                            showToast('Błąd: ' + err, 'error', 5000);
+                        } else {
+                            showToast('Orzeczenie usunięte.', 'success', 4000);
+                            loadVerdicts();
+                        }
+                    });
+                } else {
+                    // Fallback: localStorage
+                    var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                    if (code === 'ADMIN' || (v.privateCode && code === v.privateCode)) {
+                        local.splice(idx, 1);
+                        localStorage.setItem('md_verdicts', JSON.stringify(local));
+                        cleanup();
+                        showToast('Orzeczenie usunięte lokalnie.', 'info', 3000);
+                        loadVerdicts();
+                    } else {
+                        feedback.textContent = 'Nieprawidłowy kod.';
+                        feedback.className = 'field-feedback error';
+                    }
+                }
+            }
+
+            function handleCancel() {
+                cleanup();
+            }
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            input.addEventListener('keydown', function onEnter(e) {
+                if (e.key === 'Enter') { e.preventDefault(); handleConfirm(); }
+            });
+            setTimeout(function() { input.focus(); }, 100);
+        }
+
+        // Load verdicts on page load
+        if (typeof loadVerdicts === 'function') {
+            loadVerdicts();
+        }
 
         // Load community cases on page load
         if (typeof loadCommunityCases === 'function') {
