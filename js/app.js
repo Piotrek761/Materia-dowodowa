@@ -2462,18 +2462,23 @@
             // HIDDEN BUTTON: kliknij &#x2699; w stopce — aktywacja panelu admina
             // ============================================
             var adminBtn = document.getElementById('adminPanelBtn');
-            if (adminBtn) {
+            if (!adminBtn) {
+                console.warn('adminPanelBtn nie znaleziony w DOM');
+            } else {
                 adminBtn.addEventListener('click', function() {
                     var panel = document.getElementById('adminPanel');
-                    if (panel) {
-                        var curDisplay = panel.style.display;
-                        if (curDisplay === 'none' || curDisplay === '') {
-                            panel.style.display = 'block';
-                            showToast('Panel administratora aktywowany', 'info', 3000);
-                        } else {
-                            panel.style.display = 'none';
-                            showToast('Panel administratora zamknięty', 'info', 2000);
-                        }
+                    if (!panel) {
+                        console.warn('adminPanel nie znaleziony w DOM');
+                        showToast('Błąd: panel admina nie istnieje w HTML', 'error', 4000);
+                        return;
+                    }
+                    var curDisplay = panel.style.display;
+                    if (curDisplay === 'none' || curDisplay === '') {
+                        panel.style.display = 'block';
+                        showToast('Panel administratora aktywowany', 'info', 3000);
+                    } else {
+                        panel.style.display = 'none';
+                        showToast('Panel administratora zamknięty', 'info', 2000);
                     }
                 });
             }
