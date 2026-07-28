@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator pism - Kancelaria Lex i Partnerzy | Materia Dowodowa</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Times New Roman', Georgia, serif; background: #f5f3f0; color: #1a1a1a; line-height: 1.7; padding: 40px; font-size: 12pt; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 60px 80px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 20pt; text-align: center; margin-bottom: 6px; letter-spacing: 2px; }
+        h2 { font-size: 14pt; margin-top: 30px; margin-bottom: 12px; border-bottom: 2px solid #1a1a1a; padding-bottom: 4px; }
+        .head { text-align: center; margin-bottom: 40px; }
+        .head-sub { font-size: 11pt; color: #555; }
+        label { display: block; margin-top: 18px; margin-bottom: 4px; font-weight: bold; font-size: 11pt; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #999; font-family: inherit; font-size: 11pt; }
+        textarea { min-height: 120px; }
+        .btn { display: inline-block; margin-top: 24px; padding: 12px 32px; background: #1a1a1a; color: #fff; border: none; cursor: pointer; font-size: 11pt; transition: 0.2s; }
+        .btn:hover { background: #333; }
+        .footer-line { margin-top: 60px; padding-top: 20px; border-top: 1px solid #999; font-size: 10pt; text-align: center; color: #666; }
+        @media print { body { padding: 0; background: #fff; } .container { box-shadow: none; padding: 40px; } .btn { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="head">
+            <h1>KANCELARIA LEX I PARTNERZY</h1>
+            <div class="head-sub">Generator pism procesowych &mdash; Moduł standardowy</div>
+        </div>
+
+        <h2>Dane sprawy</h2>
+        <form onsubmit="alert('Funkcja generowania pisma zostanie uruchomiona w pełnej wersji systemu.'); return false;">
+            <label>Sygnatura akt:</label>
+            <input type="text" placeholder="np. I GKC 44/26">
+
+            <label>Rodzaj pisma:</label>
+            <select>
+                <option>Pozew</option>
+                <option>Odpowiedź na pozew</option>
+                <option>Apelacja</option>
+                <option>Zarządzenie</option>
+                <option>Inne</option>
+            </select>
+
+            <label>Treść pisma:</label>
+            <textarea placeholder="Wpisz treść pisma procesowego..."></textarea>
+
+            <label>Podpis:</label>
+            <input type="text" placeholder="Imię i nazwisko pełnomocnika">
+
+            <button type="submit" class="btn">Generuj pismo</button>
+        </form>
+
+        <div class="footer-line">Kancelaria Lex i Partnerzy &copy; 2026 &mdash; Symulacja Materia Dowodowa</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+    "version": 2,
+    "buildCommand": null,
+    "outputDirectory": ".",
+    "functions": {
+        "api/forum.js": {
+            "memory": 128,
+            "maxDuration": 10
+        }
+    }
+}
