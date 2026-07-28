@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: A4;
+        margin: 15mm 10mm;
+        background-color: transparent;
+    }
+    body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+    }
+
+    .row {
+        display: block;
+        clear: both;
+        margin-bottom: 25px;
+    }
+    .col {
+        float: left;
+        width: 50%;
+        text-align: center;
+        box-sizing: border-box;
+        min-height: 120px;
+    }
+
+    /* TYPOGRAFIA I RAMKI DLA PIECZĘCI NIEBIESKICH */
+    .stamp-blue {
+        color: #0033aa;
+        border: 2px solid #0033aa;
+        background: transparent;
+        display: inline-block;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-family: 'Courier New', Courier, monospace;
+        box-sizing: border-box;
+    }
+
+    .kancelaria-box {
+        width: 290px;
+        font-size: 9.5pt;
+        line-height: 1.4;
+        padding: 10px;
+        border: 3px double #0033aa;
+    }
+
+    .wplyw-container {
+        width: 280px;
+        border: 3px solid #0033aa;
+        padding: 0;
+        font-family: 'Courier New', Courier, monospace;
+        color: #0033aa;
+        box-sizing: border-box;
+        display: inline-block;
+        text-align: center;
+    }
+    .wplyw-header {
+        font-size: 8.5pt;
+        font-weight: bold;
+        padding: 5px 2px;
+        border-bottom: 2px solid #0033aa;
+        line-height: 1.3;
+    }
+    .wplyw-row-data {
+        border-bottom: 2px solid #0033aa;
+        overflow: hidden;
+        display: block;
+        width: 100%;
+    }
+    .wplyw-cell-left {
+        float: left;
+        width: 50%;
+        border-right: 2px solid #0033aa;
+        padding: 5px 4px;
+        font-size: 8pt;
+        box-sizing: border-box;
+        text-align: left;
+    }
+    .wplyw-cell-right {
+        float: left;
+        width: 50%;
+        padding: 5px 4px;
+        font-size: 8pt;
+        box-sizing: border-box;
+        text-align: left;
+    }
+    .wplyw-footer {
+        padding: 6px 6px;
+        font-size: 8pt;
+        text-align: left;
+    }
+
+    /* TYPOGRAFIA I RAMKI DLA PIECZĘCI CZERWONYCH */
+    .stamp-red {
+        color: #cc0000;
+        border: 3px dashed #cc0000;
+        background: transparent;
+        display: inline-block;
+        font-weight: bold;
+        text-transform: uppercase;
+        padding: 8px 18px;
+        font-size: 12pt;
+        letter-spacing: 1.5px;
+    }
+
+    .zgodnosc-box {
+        width: 270px;
+        border: 2px solid #0033aa;
+        padding: 10px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-size: 9.5pt;
+        font-weight: bold;
+        color: #0033aa;
+        display: inline-block;
+    }
+    .zgodnosc-line {
+        font-size: 8.5pt;
+        font-weight: normal;
+        text-align: left;
+        color: #0033aa;
+        font-family: 'Courier New', Courier, monospace;
+        margin-top: 8px;
+    }
+
+    /* KLAUZULE DEDYKOWANE (ORZECZENIA / WYKONALNOŚĆ) */
+    .klauzula-box {
+        width: 280px;
+        border: 2px solid #cc0000;
+        color: #cc0000;
+        padding: 8px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 8pt;
+        text-align: left;
+        display: inline-block;
+        box-sizing: border-box;
+    }
+    .klauzula-header {
+        font-weight: bold;
+        text-align: center;
+        font-size: 9pt;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    /* PIECZĘCIE IMIENNE (SĘDZIOWIE, KOMORNIK, URZĘDNICY) */
+    .imienna-box {
+        width: 260px;
+        border: 1.5px solid #0033aa;
+        color: #0033aa;
+        padding: 6px;
+        font-family: Arial, sans-serif;
+        font-size: 8.5pt;
+        text-align: center;
+        display: inline-block;
+        line-height: 1.3;
+    }
+    .imienna-title {
+        font-size: 7.5pt;
+        text-transform: uppercase;
+    }
+    .imienna-name {
+        font-weight: bold;
+        font-size: 9.5pt;
+        margin: 2px 0;
+    }
+
+    .court-seal-wrapper {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+</style>
+</head>
+<body>
+
+<!-- RZĄD 1: KANCELARIA PETER OF LAW -->
+<div class="row">
+    <div class="col">
+        <div class="stamp-blue kancelaria-box">
+            PETER OF LAW Sp.p.<br>
+            Zespół Sporów Gospodarczych<br>
+            ul. Rejtana 12A, 62-200 Gryfów Wlkp.<br>
+            Regon: 938201923 / NIP: 7820019283
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="wplyw-container">
+            <div class="wplyw-header">
+                <strong>PETER OF LAW Sp.p.</strong><br>
+                KANCELARIA OGÓLNA — WPŁYNĘŁO
+            </div>
+            <div class="wplyw-row-data">
+                <div class="wplyw-cell-left">DATA: .........</div>
+                <div class="wplyw-cell-right">L.DZ. ........</div>
+            </div>
+            <div class="wplyw-footer">
+                PODPIS: .....................
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 2: KANCELARIA LEX & PARTNERZY -->
+<div class="row">
+    <div class="col">
+        <div class="stamp-blue kancelaria-box" style="border-style: solid;">
+            LEX & PARTNERZY KANCELARIA PRAWNA<br>
+            Dział Prawa Handlowego i Cywilnego<br>
+            Plac Wolności 4/8, 64-330 Opaleniowice<br>
+            Regon: 140928311 / NIP: 7792019941
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="wplyw-container">
+            <div class="wplyw-header">
+                <strong>LEX & PARTNERZY</strong><br>
+                BIURO PODAWCZE — PRZYJĘTO
+            </div>
+            <div class="wplyw-row-data">
+                <div class="wplyw-cell-left">DATA: .........</div>
+                <div class="wplyw-cell-right">SYGN. ........</div>
+            </div>
+            <div class="wplyw-footer">
+                PRZYJĄŁ: ....................
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 3: KLAUZULE POUFNOŚCI -->
+<div class="row">
+    <div class="col" style="padding-top: 10px;">
+        <div class="stamp-red" style="transform: rotate(-1.5deg);">
+            ŚCIŚLE POUFNE
+        </div>
+    </div>
+
+    <div class="col" style="padding-top: 10px;">
+        <div class="stamp-red" style="border-style: solid; transform: rotate(1deg);">
+            TAJEMNICA PRZEDSIĘBIORSTWA
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 4: SĄDY W GRYFOWIE WLKP. -->
+<div class="row">
+    <!-- SĄD REJONOWY W GRYFOWIE WLKP. -->
+    <div class="col">
+        <div class="court-seal-wrapper">
+            <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path id="sr-upper" d="M 28,80 A 52,52 0 0,1 132,80" fill="none" />
+                    <path id="sr-lower" d="M 28,80 A 52,52 0 0,0 132,80" fill="none" />
+                </defs>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="#cc0000" stroke-width="3" />
+                <circle cx="80" cy="80" r="66" fill="none" stroke="#cc0000" stroke-width="1" stroke-dasharray="3,2" />
+                <circle cx="80" cy="80" r="42" fill="none" stroke="#cc0000" stroke-width="1.5" />
+                <g fill="#cc0000" font-family="Arial, sans-serif" font-size="8.5pt" font-weight="bold" letter-spacing="1.2px">
+                    <text text-anchor="middle"><textPath href="#sr-upper" startOffset="50%">SĄD REJONOWY</textPath></text>
+                    <text text-anchor="middle" dy="10"><textPath href="#sr-lower" startOffset="50%">W GRYFOWIE WLKP.</textPath></text>
+                </g>
+                <g transform="translate(80, 82)" stroke="#cc0000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                    <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                    <circle cx="0" cy="-23" r="2" fill="#cc0000" />
+                    <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                    <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                    <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                    <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#cc0000" stroke-width="1" />
+                    <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                    <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                    <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#cc0000" stroke-width="1" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- WOJEWÓDZKI SĄD ADMINISTRACYJNY W GRYFOWIE WLKP. -->
+    <div class="col">
+        <div class="court-seal-wrapper">
+            <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path id="wsa-upper" d="M 28,80 A 52,52 0 0,1 132,80" fill="none" />
+                    <path id="wsa-lower" d="M 28,80 A 52,52 0 0,0 132,80" fill="none" />
+                </defs>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="#cc0000" stroke-width="3" />
+                <circle cx="80" cy="80" r="66" fill="none" stroke="#cc0000" stroke-width="1" stroke-dasharray="3,2" />
+                <circle cx="80" cy="80" r="42" fill="none" stroke="#cc0000" stroke-width="1.5" />
+                <g fill="#cc0000" font-family="Arial, sans-serif" font-size="7pt" font-weight="bold" letter-spacing="0.8px">
+                    <text text-anchor="middle"><textPath href="#wsa-upper" startOffset="50%">WOJEWÓDZKI SĄD ADMINIS.</textPath></text>
+                    <text text-anchor="middle" dy="9"><textPath href="#wsa-lower" startOffset="50%">W GRYFOWIE WLKP.</textPath></text>
+                </g>
+                <g transform="translate(80, 82)" stroke="#cc0000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                    <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                    <circle cx="0" cy="-23" r="2" fill="#cc0000" />
+                    <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                    <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                    <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                    <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#cc0000" stroke-width="1" />
+                    <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                    <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                    <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#cc0000" stroke-width="1" />
+                </g>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 5: SĄDY W OPALENIOWICACH -->
+<div class="row">
+    <!-- SĄD NAJWYŻSZY W OPALENIOWICACH -->
+    <div class="col">
+        <div class="court-seal-wrapper">
+            <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path id="sn-upper" d="M 28,80 A 52,52 0 0,1 132,80" fill="none" />
+                    <path id="sn-lower" d="M 28,80 A 52,52 0 0,0 132,80" fill="none" />
+                </defs>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="#cc0000" stroke-width="3" />
+                <circle cx="80" cy="80" r="66" fill="none" stroke="#cc0000" stroke-width="1" stroke-dasharray="3,2" />
+                <circle cx="80" cy="80" r="42" fill="none" stroke="#cc0000" stroke-width="1.5" />
+                <g fill="#cc0000" font-family="Arial, sans-serif" font-size="8pt" font-weight="bold" letter-spacing="1px">
+                    <text text-anchor="middle"><textPath href="#sn-upper" startOffset="50%">SĄD NAJWYŻSZY</textPath></text>
+                    <text text-anchor="middle" dy="9"><textPath href="#sn-lower" startOffset="50%">W OPALENIOWICACH</textPath></text>
+                </g>
+                <g transform="translate(80, 82)" stroke="#cc0000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                    <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                    <circle cx="0" cy="-23" r="2" fill="#cc0000" />
+                    <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                    <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                    <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                    <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#cc0000" stroke-width="1" />
+                    <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                    <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                    <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#cc0000" stroke-width="1" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- NACZELNY SĄD ADMINISTRACYJNY W OPALENIOWICACH -->
+    <div class="col">
+        <div class="court-seal-wrapper">
+            <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path id="nsa-upper" d="M 28,80 A 52,52 0 0,1 132,80" fill="none" />
+                    <path id="nsa-lower" d="M 28,80 A 52,52 0 0,0 132,80" fill="none" />
+                </defs>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="#cc0000" stroke-width="3" />
+                <circle cx="80" cy="80" r="66" fill="none" stroke="#cc0000" stroke-width="1" stroke-dasharray="3,2" />
+                <circle cx="80" cy="80" r="42" fill="none" stroke="#cc0000" stroke-width="1.5" />
+                <g fill="#cc0000" font-family="Arial, sans-serif" font-size="6.8pt" font-weight="bold" letter-spacing="0.5px">
+                    <text text-anchor="middle"><textPath href="#nsa-upper" startOffset="50%">NACZELNY SĄD ADMINIS.</textPath></text>
+                    <text text-anchor="middle" dy="9"><textPath href="#nsa-lower" startOffset="50%">W OPALENIOWICACH</textPath></text>
+                </g>
+                <g transform="translate(80, 82)" stroke="#cc0000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                    <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                    <circle cx="0" cy="-23" r="2" fill="#cc0000" />
+                    <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                    <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                    <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                    <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#cc0000" stroke-width="1" />
+                    <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                    <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                    <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#cc0000" stroke-width="1" />
+                </g>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 6: WPŁYW DO SĄDÓW (NOWE) -->
+<div class="row">
+    <!-- WPŁYW SĄD REJONOWY -->
+    <div class="col">
+        <div class="wplyw-container" style="border-color: #cc0000; color: #cc0000;">
+            <div class="wplyw-header" style="border-bottom-color: #cc0000;">
+                <strong>SĄD REJONOWY W GRYFOWIE WLKP.</strong><br>
+                I WYDZIAŁ CYWILNY — WPŁYNĘŁO
+            </div>
+            <div class="wplyw-row-data" style="border-bottom-color: #cc0000;">
+                <div class="wplyw-cell-left" style="border-right-color: #cc0000;">DATA: .........</div>
+                <div class="wplyw-cell-right">DZ.U. .........</div>
+            </div>
+            <div class="wplyw-footer">
+                ZAŁĄCZNIKÓW: ...... PODPIS: ........
+            </div>
+        </div>
+    </div>
+
+    <!-- WPŁYW WSA -->
+    <div class="col">
+        <div class="wplyw-container" style="border-color: #cc0000; color: #cc0000;">
+            <div class="wplyw-header" style="border-bottom-color: #cc0000;">
+                <strong>WOJEWÓDZKI SĄD ADMINISTRACYJNY</strong><br>
+                KANCELARIA OGÓLNA — PRZYJĘTO
+            </div>
+            <div class="wplyw-row-data" style="border-bottom-color: #cc0000;">
+                <div class="wplyw-cell-left" style="border-right-color: #cc0000;">DATA: .........</div>
+                <div class="wplyw-cell-right">SYGN: .........</div>
+            </div>
+            <div class="wplyw-footer">
+                OPŁATA: ........... PODPIS: ........
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 7: STEMPLE URZĘDOWE I DECYZYJNE -->
+<div class="row">
+    <div class="col">
+        <div class="zgodnosc-box">
+            <span style="letter-spacing: 0.5px;">ZA ZGODNOŚĆ Z ORYGINAŁEM</span>
+            <div class="zgodnosc-line">Data: ......................</div>
+            <div class="zgodnosc-line">Podpis: ...................</div>
+        </div>
+    </div>
+
+    <div class="col" style="padding-top: 5px;">
+        <div class="stamp-red" style="border-style: double; border-width: 4px; font-size: 11pt; padding: 6px 14px; margin-bottom: 8px;">
+            PRZYJĘTO
+        </div>
+        <br>
+        <div class="stamp-red" style="border-style: solid; font-size: 11pt; padding: 6px 14px;">
+            ODDALONO
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 8: KLAUZULA WYKONALNOŚCI I PRAWOMOCNOŚCI (NOWE) -->
+<div class="row">
+    <!-- KLAUZULA WYKONALNOŚCI -->
+    <div class="col">
+        <div class="klauzula-box">
+            <div class="klauzula-header">Tytuł Wykonawczy</div>
+            Orzeczenie jest prawomocne i podlega wykonaniu.<br>
+            Poleca się wszystkim organom wykonanie niniejszego tytułu.<br>
+            <div style="margin-top: 6px;">Dnia: .................... r.</div>
+            <div>Sędzia: ...................</div>
+        </div>
+    </div>
+
+    <!-- STWIERDZENIE PRAWOMOCNOŚCI -->
+    <div class="col">
+        <div class="klauzula-box" style="border-color: #0033aa; color: #0033aa;">
+            <div class="klauzula-header">Stwierdzenie Prawomocności</div>
+            Zaświadcza się, że orzeczenie stało się prawomocne z dniem .................... r.<br>
+            <div style="margin-top: 10px;">Gryfów Wlkp., dnia ............... r.</div>
+            <div style="margin-top: 4px;">Kierownik Sekretariatu: ................</div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 9: PIECZĘCIE IMIENNE SĘDZIÓW I PRZEWODNICZĄCYCH (NOWE) -->
+<div class="row">
+    <div class="col">
+        <div class="imienna-box">
+            <div class="imienna-title">Przewodniczący I Wydziału Gospodarczego</div>
+            <div class="imienna-name">Sędzia SR Janusz Malinowski</div>
+            <div style="font-size: 7.5pt; color: #555;">(podpis)</div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="imienna-box" style="border-color: #cc0000; color: #cc0000;">
+            <div class="imienna-title">Sędzia Sprawozdawca</div>
+            <div class="imienna-name">Sędzia WSA Anna Wysocka</div>
+            <div style="font-size: 7.5pt; color: #777;">(podpis)</div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 10: KOMORNIK SĄDOWY I OPŁATY SĄDOWE (NOWE) -->
+<div class="row">
+    <!-- KOMORNIK SĄDOWY (PIECZĘĆ OKRĄGŁA) -->
+    <div class="col">
+        <div class="court-seal-wrapper">
+            <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <path id="kom-upper" d="M 28,80 A 52,52 0 0,1 132,80" fill="none" />
+                    <path id="kom-lower" d="M 28,80 A 52,52 0 0,0 132,80" fill="none" />
+                </defs>
+                <circle cx="80" cy="80" r="72" fill="none" stroke="#0033aa" stroke-width="2.5" />
+                <circle cx="80" cy="80" r="65" fill="none" stroke="#0033aa" stroke-width="1" />
+                <circle cx="80" cy="80" r="44" fill="none" stroke="#0033aa" stroke-width="1.2" />
+                <g fill="#0033aa" font-family="Arial, sans-serif" font-size="7.5pt" font-weight="bold" letter-spacing="1px">
+                    <text text-anchor="middle"><textPath href="#kom-upper" startOffset="50%">KOMORNIK SĄDOWY</textPath></text>
+                    <text text-anchor="middle" dy="9"><textPath href="#kom-lower" startOffset="50%">PRI SĄDZIE REJONOWYM</textPath></text>
+                </g>
+                <text x="80" y="88" fill="#0033aa" font-family="'Times New Roman', serif" font-size="28pt" font-weight="bold" text-anchor="middle">§</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- STEMPEL OPŁATY SĄDOWEJ / SKARBOWEJ -->
+    <div class="col" style="padding-top: 15px;">
+        <div class="stamp-blue" style="width: 250px; padding: 8px; font-size: 8.5pt; text-align: center; border-style: dashed;">
+            OPŁATA SĄDOWA UŚISZCZONA<br>
+            <div style="margin-top: 4px; font-size: 10pt; font-weight: bold;">KWOTA: ......... ZŁ</div>
+            <div style="font-size: 7.5pt; margin-top: 4px; font-weight: normal;">Znaki opłaty sądowej / Przelew</div>
+            <div style="margin-top: 4px;">Data i podpis: ..................</div>
+        </div>
+    </div>
+</div>
+
+<!-- RZĄD 11: DODATKOWE KLAUZULE DEKRETACYJNE (NOWE) -->
+<div class="row">
+    <div class="col">
+        <div class="stamp-red" style="transform: rotate(-1deg); border-style: solid; font-size: 11pt;">
+            ODRZUCONO
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="stamp-blue" style="transform: rotate(1deg); font-size: 10pt; padding: 6px 12px; border-width: 2px;">
+            WPISANO DO REJESTRU
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
