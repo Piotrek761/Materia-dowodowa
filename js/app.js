@@ -2438,14 +2438,16 @@
             }
 
             // ============================================
-            // KEYBOARD SHORTCUT: Ctrl+Alt+Shift+P — aktywacja panelu admina
+            // KEYBOARD SHORTCUT: Ctrl+Alt+P — aktywacja panelu admina
             // ============================================
             document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.altKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+                // Ctrl+Alt bez Shifta — prosty 3-klawiszowy skrót
+                if (e.ctrlKey && e.altKey && !e.shiftKey && e.code === 'KeyP') {
                     e.preventDefault();
                     var panel = document.getElementById('adminPanel');
                     if (panel) {
-                        if (panel.style.display === 'none' || panel.style.display === '') {
+                        var curDisplay = panel.style.display;
+                        if (curDisplay === 'none' || curDisplay === '') {
                             panel.style.display = 'block';
                             showToast('Panel administratora aktywowany', 'info', 3000);
                         } else {
