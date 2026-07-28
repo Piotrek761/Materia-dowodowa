@@ -842,24 +842,34 @@
         })();
 
         window.loadCommunityCases = function () {
+            console.log('[DEBUG] loadCommunityCases() called');
             var pdfGrid = document.getElementById('community-pdf-grid');
             var htmlGrid = document.getElementById('community-html-grid');
-            if (!pdfGrid || !htmlGrid) return;
+            if (!pdfGrid || !htmlGrid) {
+                console.warn('[DEBUG] loadCommunityCases: grids not found! pdfGrid=' + (!!pdfGrid) + ' htmlGrid=' + (!!htmlGrid));
+                return;
+            }
+            console.log('[DEBUG] loadCommunityCases: grids found');
 
             if (typeof GitHubAPI !== 'undefined' && GitHubAPI.readCases) {
+                console.log('[DEBUG] loadCommunityCases: calling GitHubAPI.readCases...');
                 GitHubAPI.readCases(function(err, data) {
                     if (!err && data && Array.isArray(data)) {
+                        console.log('[DEBUG] loadCommunityCases: API returned ' + data.length + ' cases');
                         window._communityCases = data;
                         renderCommunityCases(data, pdfGrid, htmlGrid);
                     } else {
-                        // Fallback: localStorage
+                        console.warn('[DEBUG] loadCommunityCases: API error, err=' + err + ', fallback to localStorage');
                         var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                        console.log('[DEBUG] loadCommunityCases: localStorage has ' + local.length + ' items');
                         window._communityCases = local;
                         renderCommunityCases(local, pdfGrid, htmlGrid);
                     }
                 });
             } else {
+                console.warn('[DEBUG] loadCommunityCases: GitHubAPI not available, using localStorage');
                 var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                console.log('[DEBUG] loadCommunityCases: localStorage has ' + local.length + ' items');
                 window._communityCases = local;
                 renderCommunityCases(local, pdfGrid, htmlGrid);
             }
@@ -869,6 +879,13 @@
         // Renderuj sprawy społeczności (z API lub localStorage)
         // ============================================
         function renderCommunityCases(cases, pdfGrid, htmlGrid) {
+            if (typeof escapeHtml !== 'function') {
+                console.error('[DEBUG] CRITICAL: escapeHtml is not defined in renderCommunityCases!');
+                if (typeof showToast === 'function') {
+                    showToast('Błąd renderowania spraw — brak funkcji escapeHtml', 'error', 8000);
+                }
+                return;
+            }
             pdfGrid.innerHTML = '';
             htmlGrid.innerHTML = '';
 
@@ -966,7 +983,7 @@
             document.querySelectorAll('.case-del-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var idx = parseInt(this.getAttribute('data-idx'));
-                    showCommunityDeleteModal('temat', idx);
+                    showCommunityDeleteModal(idx);
                 });
             });
 
@@ -2221,22 +2238,33 @@
         // VERDICTS — load, render, delete
         // ============================================
         window.loadVerdicts = function() {
+            console.log('[DEBUG] loadVerdicts() called');
             var container = document.getElementById('dynamic-verdicts');
-            if (!container) return;
+            if (!container) {
+                console.warn('[DEBUG] loadVerdicts: container #dynamic-verdicts not found!');
+                return;
+            }
+            console.log('[DEBUG] loadVerdicts: container found');
 
             if (typeof GitHubAPI !== 'undefined' && GitHubAPI.readVerdicts) {
+                console.log('[DEBUG] loadVerdicts: calling GitHubAPI.readVerdicts...');
                 GitHubAPI.readVerdicts(function(err, data) {
                     if (!err && data && Array.isArray(data)) {
+                        console.log('[DEBUG] loadVerdicts: API returned ' + data.length + ' verdicts');
                         window._verdicts = data;
                         renderVerdicts(data);
                     } else {
+                        console.warn('[DEBUG] loadVerdicts: API error or invalid data, err=' + err + ', data=' + (data ? 'exists' : 'null'));
                         var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                        console.log('[DEBUG] loadVerdicts: fallback to localStorage, ' + local.length + ' items');
                         window._verdicts = local;
                         renderVerdicts(local);
                     }
                 });
             } else {
+                console.warn('[DEBUG] loadVerdicts: GitHubAPI not available, using localStorage');
                 var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                console.log('[DEBUG] loadVerdicts: localStorage has ' + local.length + ' items');
                 window._verdicts = local;
                 renderVerdicts(local);
             }
@@ -2244,8 +2272,21 @@
 
         function renderVerdicts(verdicts) {
             var container = document.getElementById('dynamic-verdicts');
-            if (!container) return;
+            if (!container) {
+                console.warn('[DEBUG] renderVerdicts: container #dynamic-verdicts not found');
+                return;
+            }
 
+            // Sprawdź czy escapeHtml jest dostępne
+            if (typeof escapeHtml !== 'function') {
+                console.error('[DEBUG] CRITICAL: escapeHtml is not defined!');
+                if (typeof showToast === 'function') {
+                    showToast('Błąd renderowania — brak funkcji escapeHtml', 'error', 8000);
+                }
+                return;
+            }
+
+            console.log('[DEBUG] renderVerdicts: rendering ' + (verdicts ? verdicts.length : 0) + ' items');
             container.innerHTML = '';
 
             if (!verdicts || verdicts.length === 0) {
@@ -2290,6 +2331,7 @@
                     showVerdictDeleteModal(idx);
                 });
             });
+            console.log('[DEBUG] renderVerdicts: done, ' + container.querySelectorAll('.card').length + ' cards rendered');
         }
 
         function showVerdictDeleteCodeDisplay(code) {
@@ -2404,13 +2446,35 @@
             setTimeout(function() { input.focus(); }, 100);
         }
 
-        // Load verdicts on page load
-        if (typeof loadVerdicts === 'function') {
-            loadVerdicts();
+        // Globalny escapeHtml — potrzebny dla renderVerdicts i renderCommunityCases
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
         }
 
+        // Load verdicts on page load
+        console.log('[DEBUG] Checking loadVerdicts... type=' + (typeof loadVerdicts) + ' window=' + (typeof window.loadVerdicts));
+        if (typeof window.loadVerdicts === 'function') {
+            console.log('[DEBUG] Calling window.loadVerdicts() on page load');
+            try {
+                window.loadVerdicts();
+            } catch(e) {
+                console.error('[DEBUG] Error in loadVerdicts:', e);
+            }
+        } else {
+            console.warn('[DEBUG] loadVerdicts is not a function!');
+        }
 
         // Load community cases on page load
-        if (typeof loadCommunityCases === 'function') {
-            loadCommunityCases();
+        console.log('[DEBUG] Checking loadCommunityCases... type=' + (typeof loadCommunityCases) + ' window=' + (typeof window.loadCommunityCases));
+        if (typeof window.loadCommunityCases === 'function') {
+            console.log('[DEBUG] Calling window.loadCommunityCases() on page load');
+            try {
+                window.loadCommunityCases();
+            } catch(e) {
+                console.error('[DEBUG] Error in loadCommunityCases:', e);
+            }
+        } else {
+            console.warn('[DEBUG] loadCommunityCases is not a function!');
         }
