@@ -2421,6 +2421,51 @@
                 div.appendChild(document.createTextNode(text));
                 return div.innerHTML;
             }
+            // ============================================
+            // ADMIN PANEL — getter z auto-tworzeniem w razie braku w DOM
+            // ============================================
+            function getOrCreateAdminPanel() {
+                var panel = document.getElementById('adminPanel');
+                if (panel) return panel;
+
+                // Tworzymy dynamicznie, jeśli nie ma w HTML
+                panel = document.createElement('div');
+                panel.id = 'adminPanel';
+                panel.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;padding:40px 20px;';
+                panel.innerHTML =
+                    '<div style="max-width:800px;margin:0 auto;background:var(--surface);border-radius:var(--rs);padding:40px;border:1px solid var(--border);">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">' +
+                            '<h2 style="margin:0;color:var(--accent);font-weight:700;">&#x2699; Panel Administratora</h2>' +
+                            '<button id="adminPanelCloseBtn" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">&times;</button>' +
+                        '</div>' +
+                        '<div class="card" style="margin-bottom:24px;">' +
+                            '<h3 style="margin-bottom:16px;">Dodaj oficjaln&#x105; spraw&#x119;</h3>' +
+                            '<div class="form-group"><label for="adminCaseTitle">Tytu&#x142; sprawy</label><input type="text" id="adminCaseTitle" placeholder="Np. Sprawa nr 04/2026"></div>' +
+                            '<div class="form-group"><label for="adminCaseSygnatura">Sygnatura</label><input type="text" id="adminCaseSygnatura" placeholder="Np. IV GC 316/26"></div>' +
+                            '<div class="form-group"><label for="adminCaseDesc">Opis sprawy</label><textarea id="adminCaseDesc" rows="2" placeholder="Kr&oacute;tki opis..."></textarea></div>' +
+                            '<div class="form-group"><label for="adminCaseFile">Plik HTML z teczk&#x105; sprawy</label><input type="file" id="adminCaseFile" accept=".html"></div>' +
+                            '<div style="display:flex;gap:10px;margin-top:10px;"><button class="btn-action" id="adminAddCaseBtn" type="button">Opublikuj spraw&#x119;</button></div>' +
+                            '<p id="adminCaseFeedback" style="margin-top:10px;font-size:0.9rem;"></p>' +
+                        '</div>' +
+                        '<div class="card">' +
+                            '<h3 style="margin-bottom:16px;">Dodaj generator</h3>' +
+                            '<div class="form-group"><label for="adminGenTitle">Nazwa generatora</label><input type="text" id="adminGenTitle" placeholder="Np. Generator pism kancelarii XYZ"></div>' +
+                            '<div class="form-group"><label for="adminGenDesc">Opis</label><textarea id="adminGenDesc" rows="2" placeholder="Kr&oacute;tki opis..."></textarea></div>' +
+                            '<div class="form-group"><label for="adminGenFile">Plik HTML generatora</label><input type="file" id="adminGenFile" accept=".html"></div>' +
+                            '<div style="display:flex;gap:10px;margin-top:10px;"><button class="btn-action" id="adminAddGeneratorBtn" type="button">Opublikuj generator</button></div>' +
+                            '<p id="adminGenFeedback" style="margin-top:10px;font-size:0.9rem;"></p>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(panel);
+
+                document.getElementById('adminPanelCloseBtn').addEventListener('click', function() {
+                    panel.style.display = 'none';
+                });
+
+                return panel;
+            }
+
+            // === LOGO 5x ===
             var logoClickCount = 0;
             var logo = document.querySelector('.nav-logo, .nav-brand');
             if (logo) {
@@ -2428,32 +2473,38 @@
                     logoClickCount++;
                     if (logoClickCount >= 5) {
                         logoClickCount = 0;
-                        var panel = document.getElementById('adminPanel');
-                        if (panel) {
-                            panel.style.display = 'block';
-                            showToast('Panel administratora aktywowany', 'info', 3000);
-                        }
+                        getOrCreateAdminPanel().style.display = 'block';
+                        showToast('Panel administratora aktywowany', 'info', 3000);
                     }
                 });
             }
 
-            // ============================================
-            // KEYBOARD SHORTCUT: Ctrl+Alt+P — aktywacja panelu admina
-            // ============================================
+            // === GEAR ICON IN FOOTER ===
+            var adminBtn = document.getElementById('adminPanelBtn');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', function() {
+                    var panel = getOrCreateAdminPanel();
+                    if (panel.style.display === 'none' || panel.style.display === '') {
+                        panel.style.display = 'block';
+                        showToast('Panel administratora aktywowany', 'info', 3000);
+                    } else {
+                        panel.style.display = 'none';
+                        showToast('Panel administratora zamkni&#x119;ty', 'info', 2000);
+                    }
+                });
+            }
+
+            // === KEYBOARD SHORTCUT: Ctrl+Alt+P ===
             document.addEventListener('keydown', function(e) {
-                // Ctrl+Alt bez Shifta — prosty 3-klawiszowy skrót
                 if (e.ctrlKey && e.altKey && !e.shiftKey && e.code === 'KeyP') {
                     e.preventDefault();
-                    var panel = document.getElementById('adminPanel');
-                    if (panel) {
-                        var curDisplay = panel.style.display;
-                        if (curDisplay === 'none' || curDisplay === '') {
-                            panel.style.display = 'block';
-                            showToast('Panel administratora aktywowany', 'info', 3000);
-                        } else {
-                            panel.style.display = 'none';
-                            showToast('Panel administratora zamknięty', 'info', 2000);
-                        }
+                    var panel = getOrCreateAdminPanel();
+                    if (panel.style.display === 'none' || panel.style.display === '') {
+                        panel.style.display = 'block';
+                        showToast('Panel administratora aktywowany', 'info', 3000);
+                    } else {
+                        panel.style.display = 'none';
+                        showToast('Panel administratora zamkni&#x119;ty', 'info', 2000);
                     }
                 }
             });
@@ -2495,109 +2546,113 @@
                 return baseUrl + '/api/admin';
             }
 
-            // Dodaj sprawę
-            var addCaseBtn = document.getElementById('adminAddCaseBtn');
-            if (addCaseBtn) {
-                addCaseBtn.addEventListener('click', function() {
-                    var title = document.getElementById('adminCaseTitle');
-                    var sygnatura = document.getElementById('adminCaseSygnatura');
-                    var desc = document.getElementById('adminCaseDesc');
-                    var fileInput = document.getElementById('adminCaseFile');
-                    var feedback = document.getElementById('adminCaseFeedback');
+            // === ADMIN BUTTONS: delegacja zdarzeń (działa nawet gdy panel tworzony dynamicznie) ===
+            document.addEventListener('click', function(e) {
+                // Delegacja dla adminAddCaseBtn
+                if (e.target && e.target.id === 'adminAddCaseBtn') {
+                    handleAdminAddCase();
+                }
+                // Delegacja dla adminAddGeneratorBtn
+                if (e.target && e.target.id === 'adminAddGeneratorBtn') {
+                    handleAdminAddGenerator();
+                }
+            });
 
-                    if (!title || !title.value.trim()) {
-                        if (feedback) feedback.textContent = 'Wpisz tytuł sprawy.';
+            function handleAdminAddCase() {
+                var btn = document.getElementById('adminAddCaseBtn');
+                var title = document.getElementById('adminCaseTitle');
+                var sygnatura = document.getElementById('adminCaseSygnatura');
+                var desc = document.getElementById('adminCaseDesc');
+                var fileInput = document.getElementById('adminCaseFile');
+                var feedback = document.getElementById('adminCaseFeedback');
+
+                if (!title || !title.value.trim()) {
+                    if (feedback) feedback.textContent = 'Wpisz tytuł sprawy.';
+                    return;
+                }
+                if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                    if (feedback) feedback.textContent = 'Wybierz plik HTML.';
+                    return;
+                }
+
+                var file = fileInput.files[0];
+                if (!file.name.toLowerCase().endsWith('.html')) {
+                    if (feedback) feedback.textContent = 'Plik musi być w formacie HTML.';
+                    return;
+                }
+
+                if (feedback) feedback.textContent = 'Wysyłanie...';
+                btn.disabled = true;
+
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    var password = prompt('Podaj hasło administratora:');
+                    if (!password) {
+                        if (feedback) feedback.textContent = 'Anulowano.';
+                        btn.disabled = false;
                         return;
                     }
-                    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-                        if (feedback) feedback.textContent = 'Wybierz plik HTML.';
-                        return;
-                    }
 
-                    var file = fileInput.files[0];
-                    if (!file.name.toLowerCase().endsWith('.html')) {
-                        if (feedback) feedback.textContent = 'Plik musi być w formacie HTML.';
-                        return;
-                    }
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', getAdminUrl(), true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Accept', 'application/json');
 
-                    if (feedback) feedback.textContent = 'Wysyłanie...';
-                    addCaseBtn.disabled = true;
-
-                    var reader = new FileReader();
-                    reader.onload = function(ev) {
-                        // Zapytaj o hasło admina
-                        var password = prompt('Podaj hasło administratora:');
-                        if (!password) {
-                            if (feedback) feedback.textContent = 'Anulowano.';
-                            addCaseBtn.disabled = false;
-                            return;
-                        }
-
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('POST', getAdminUrl(), true);
-                        xhr.setRequestHeader('Content-Type', 'application/json');
-                        xhr.setRequestHeader('Accept', 'application/json');
-
-                        xhr.onload = function() {
-                            addCaseBtn.disabled = false;
-                            if (xhr.status >= 200 && xhr.status < 300) {
-                                if (feedback) {
-                                    feedback.textContent = '&#x2714; Sprawa opublikowana! Odśwież stronę, aby zobaczyć.';
-                                    feedback.style.color = 'var(--success)';
-                                }
-                                title.value = '';
-                                if (sygnatura) sygnatura.value = '';
-                                if (desc) desc.value = '';
-                                fileInput.value = '';
-                                showToast('Sprawa dodana! Odśwież stronę.', 'success', 5000);
-                            } else {
-                                var errMsg = 'Błąd (HTTP ' + xhr.status + ')';
-                                try { var d = JSON.parse(xhr.responseText); if (d.error) errMsg = d.error; } catch(e) {}
-                                if (feedback) {
-                                    feedback.textContent = '&#x2716; ' + errMsg;
-                                    feedback.style.color = 'var(--danger)';
-                                }
-                            }
-                        };
-
-                        xhr.onerror = function() {
-                            addCaseBtn.disabled = false;
+                    xhr.onload = function() {
+                        btn.disabled = false;
+                        if (xhr.status >= 200 && xhr.status < 300) {
                             if (feedback) {
-                                feedback.textContent = '&#x2716; Błąd sieci.';
+                                feedback.textContent = '&#x2714; Sprawa opublikowana! Odśwież stronę.';
+                                feedback.style.color = 'var(--success)';
+                            }
+                            title.value = '';
+                            if (sygnatura) sygnatura.value = '';
+                            if (desc) desc.value = '';
+                            fileInput.value = '';
+                            showToast('Sprawa dodana! Odśwież stronę.', 'success', 5000);
+                        } else {
+                            var errMsg = 'Błąd (HTTP ' + xhr.status + ')';
+                            try { var d = JSON.parse(xhr.responseText); if (d.error) errMsg = d.error; } catch(e) {}
+                            if (feedback) {
+                                feedback.textContent = '&#x2716; ' + errMsg;
                                 feedback.style.color = 'var(--danger)';
                             }
-                        };
-
-                        xhr.send(JSON.stringify({
-                            action: 'addCase',
-                            password: password,
-                            title: title.value.trim(),
-                            sygnatura: sygnatura ? sygnatura.value.trim() : '',
-                            desc: desc ? desc.value.trim() : '',
-                            htmlContent: ev.target.result
-                        }));
+                        }
                     };
-                    reader.readAsText(file);
-                });
+                    xhr.onerror = function() {
+                        btn.disabled = false;
+                        if (feedback) {
+                            feedback.textContent = '&#x2716; Błąd sieci.';
+                            feedback.style.color = 'var(--danger)';
+                        }
+                    };
+                    xhr.send(JSON.stringify({
+                        action: 'addCase',
+                        password: password,
+                        title: title.value.trim(),
+                        sygnatura: sygnatura ? sygnatura.value.trim() : '',
+                        desc: desc ? desc.value.trim() : '',
+                        htmlContent: ev.target.result
+                    }));
+                };
+                reader.readAsText(file);
             }
 
-            // Dodaj generator
-            var addGenBtn = document.getElementById('adminAddGeneratorBtn');
-            if (addGenBtn) {
-                addGenBtn.addEventListener('click', function() {
-                    var title = document.getElementById('adminGenTitle');
-                    var desc = document.getElementById('adminGenDesc');
-                    var fileInput = document.getElementById('adminGenFile');
-                    var feedback = document.getElementById('adminGenFeedback');
+            function handleAdminAddGenerator() {
+                var btn = document.getElementById('adminAddGeneratorBtn');
+                var title = document.getElementById('adminGenTitle');
+                var desc = document.getElementById('adminGenDesc');
+                var fileInput = document.getElementById('adminGenFile');
+                var feedback = document.getElementById('adminGenFeedback');
 
-                    if (!title || !title.value.trim()) {
-                        if (feedback) feedback.textContent = 'Wpisz nazwę generatora.';
-                        return;
-                    }
-                    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-                        if (feedback) feedback.textContent = 'Wybierz plik HTML.';
-                        return;
-                    }
+                if (!title || !title.value.trim()) {
+                    if (feedback) feedback.textContent = 'Wpisz nazwę generatora.';
+                    return;
+                }
+                if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                    if (feedback) feedback.textContent = 'Wybierz plik HTML.';
+                    return;
+                }
 
                     var file = fileInput.files[0];
                     if (!file.name.toLowerCase().endsWith('.html')) {
