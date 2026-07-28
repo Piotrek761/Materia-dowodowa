@@ -5,6 +5,9 @@
             // TAB SWITCHING
             // ============================================
             function switchTab(tabId) {
+                // Wyczyść flagę edycji przy każdej zmianie zakładki
+                window._editingCase = null;
+
                 // Update content panels
                 document.querySelectorAll('.tab-content').forEach(function (el) {
                     el.classList.remove('active');
@@ -449,6 +452,7 @@
             if (cancelBtn && formContainer) {
                 cancelBtn.addEventListener('click', function () {
                     formContainer.style.display = 'none';
+                    window._editingCase = null;
                     var form = document.getElementById('communityCaseForm');
                     if (form) form.reset();
                     var info = document.getElementById('ccFileInfo');
@@ -557,9 +561,65 @@
                 });
             });
 
-            // Form submit
+            // Form submit — przez API do GitHub
             communityForm.addEventListener('submit', function (e) {
                 e.preventDefault();
+
+                // Sprawdź czy to edycja istniejącej sprawy
+                if (window._editingCase) {
+                    var ec = window._editingCase;
+                    window._editingCase = null;
+
+                    var edTitle = document.getElementById('ccTitle').value.trim();
+                    var edSygnatura = document.getElementById('ccSygnatura').value.trim();
+                    var edCourt = document.getElementById('ccCourt').value.trim();
+                    var edType = document.getElementById('ccType').value;
+                    var edPower = document.getElementById('ccPower').value.trim();
+                    var edDefendant = document.getElementById('ccDefendant').value.trim();
+                    var edDesc = document.getElementById('ccDesc').value.trim();
+                    var edAuthor = document.getElementById('ccAuthor').value.trim();
+
+                    if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postCaseAction) {
+                        GitHubAPI.postCaseAction('edit', {
+                            caseIdx: ec.idx,
+                            code: ec.code,
+                            title: edTitle,
+                            sygnatura: edSygnatura,
+                            court: edCourt,
+                            type: edType,
+                            power: edPower,
+                            defendant: edDefendant,
+                            desc: edDesc,
+                            author: edAuthor
+                        }, function(err) {
+                            if (err) {
+                                showToast('Błąd aktualizacji: ' + err, 'error', 5000);
+                            } else {
+                                showToast('Sprawa zaktualizowana!', 'success', 4000);
+                            }
+                            loadCommunityCases();
+                        });
+                    } else {
+                        showToast('API niedostępne — edycja tylko lokalnie.', 'info', 4000);
+                    }
+
+                    // Reset form
+                    communityForm.reset();
+                    if (ccFileInfo) {
+                        ccFileInfo.style.display = 'none';
+                        ccFileInfo.innerHTML = '';
+                    }
+                    document.getElementById('ccFileText').textContent = 'Kliknij, aby wybrać plik (PDF lub HTML)';
+                    document.getElementById('ccFileHint').textContent = 'lub przeciągnij i upuść plik tutaj';
+                    communityForm.querySelectorAll('.field-feedback').forEach(function (el) {
+                        el.textContent = ''; el.className = 'field-feedback';
+                    });
+                    communityForm.querySelectorAll('input.success, textarea.success, select.success').forEach(function (el) {
+                        el.classList.remove('success');
+                    });
+                    switchTab('community');
+                    return;
+                }
 
                 var title = document.getElementById('ccTitle');
                 var sygnatura = document.getElementById('ccSygnatura');
@@ -648,7 +708,6 @@
                     };
 
                     var caseData = {
-                        id: Date.now(),
                         title: title.value.trim(),
                         sygnatura: sygnatura.value.trim(),
                         court: court.value.trim(),
@@ -660,50 +719,102 @@
                         format: format,
                         fileName: file.name,
                         data: ev.target.result,
-                        size: file.size,
-                        uploadedAt: new Date().toISOString()
+                        size: file.size
                     };
 
-                    var cases = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
-                    cases.unshift(caseData);
-                    localStorage.setItem('md_community_cases', JSON.stringify(cases));
+                    // Wyślij przez API
+                    if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postCaseAction) {
+                        GitHubAPI.postCaseAction('create', caseData, function(err, result) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('loading');
 
-                    showToast('Sprawa "' + title.value.trim() + '" została opublikowana w społeczności!', 'success', 5000);
+                            if (err) {
+                                showToast('Błąd publikacji: ' + err, 'error', 5000);
+                            } else {
+                                var serverCode = result && result.deleteCode ? result.deleteCode : 'BŁĄD-KODU';
+                                showToast('Sprawa "' + title.value.trim() + '" została opublikowana!', 'success', 5000);
+                                // Pokaż i zapisz kod usuwania w przeglądarce
+                                showCommunityDeleteCodeDisplay(serverCode);
 
-                    // Reset form
-                    communityForm.reset();
-                    if (ccFileInfo) {
-                        ccFileInfo.style.display = 'none';
-                        ccFileInfo.innerHTML = '';
+                                // Odśwież listę spraw
+                                loadCommunityCases();
+                            }
+
+                            // Reset form
+                            communityForm.reset();
+                            if (ccFileInfo) {
+                                ccFileInfo.style.display = 'none';
+                                ccFileInfo.innerHTML = '';
+                            }
+                            document.getElementById('ccFileText').textContent = 'Kliknij, aby wybrać plik (PDF lub HTML)';
+                            document.getElementById('ccFileHint').textContent = 'lub przeciągnij i upuść plik tutaj';
+                            communityForm.querySelectorAll('.field-feedback').forEach(function (el) {
+                                el.textContent = ''; el.className = 'field-feedback';
+                            });
+                            communityForm.querySelectorAll('input.success, textarea.success, select.success').forEach(function (el) {
+                                el.classList.remove('success');
+                            });
+
+                            switchTab('community');
+                        });
+                    } else {
+                        // Fallback: localStorage
+                        var cases = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                        cases.unshift(caseData);
+                        localStorage.setItem('md_community_cases', JSON.stringify(cases));
+
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('loading');
+                        showToast('Sprawa dodana lokalnie (tryb offline)', 'info', 5000);
+                        communityForm.reset();
+                        if (ccFileInfo) {
+                            ccFileInfo.style.display = 'none';
+                            ccFileInfo.innerHTML = '';
+                        }
+                        document.getElementById('ccFileText').textContent = 'Kliknij, aby wybrać plik (PDF lub HTML)';
+                        document.getElementById('ccFileHint').textContent = 'lub przeciągnij i upuść plik tutaj';
+                        communityForm.querySelectorAll('.field-feedback').forEach(function (el) {
+                            el.textContent = ''; el.className = 'field-feedback';
+                        });
+                        communityForm.querySelectorAll('input.success, textarea.success, select.success').forEach(function (el) {
+                            el.classList.remove('success');
+                        });
+                        loadCommunityCases();
+                        switchTab('community');
                     }
-                    document.getElementById('ccFileText').textContent = 'Kliknij, aby wybrać plik (PDF lub HTML)';
-                    document.getElementById('ccFileHint').textContent = 'lub przeciągnij i upuść plik tutaj';
-
-                    communityForm.querySelectorAll('.field-feedback').forEach(function (el) {
-                        el.textContent = '';
-                        el.className = 'field-feedback';
-                    });
-                    communityForm.querySelectorAll('input.success, textarea.success, select.success').forEach(function (el) {
-                        el.classList.remove('success');
-                    });
-
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('loading');
-
-                    loadCommunityCases();
-                    switchTab('community');
                 };
                 reader.readAsDataURL(file);
             });
         })();
 
         window.loadCommunityCases = function () {
-            var cases = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
             var pdfGrid = document.getElementById('community-pdf-grid');
             var htmlGrid = document.getElementById('community-html-grid');
-
             if (!pdfGrid || !htmlGrid) return;
 
+            if (typeof GitHubAPI !== 'undefined' && GitHubAPI.readCases) {
+                GitHubAPI.readCases(function(err, data) {
+                    if (!err && data && Array.isArray(data)) {
+                        window._communityCases = data;
+                        renderCommunityCases(data, pdfGrid, htmlGrid);
+                    } else {
+                        // Fallback: localStorage
+                        var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                        window._communityCases = local;
+                        renderCommunityCases(local, pdfGrid, htmlGrid);
+                    }
+                });
+            } else {
+                var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                window._communityCases = local;
+                renderCommunityCases(local, pdfGrid, htmlGrid);
+            }
+        };
+
+        // ============================================
+        // Renderuj sprawy społeczności (z API lub localStorage)
+        // ============================================
+        function renderCommunityCases(cases, pdfGrid, htmlGrid) {
             pdfGrid.innerHTML = '';
             htmlGrid.innerHTML = '';
 
@@ -711,13 +822,28 @@
             var htmlCases = cases.filter(function (c) { return c.format === 'html'; });
 
             function formatSize(bytes) {
+                if (!bytes) return '0 B';
                 if (bytes < 1024) return bytes + ' B';
                 if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
                 return (bytes / 1048576).toFixed(1) + ' MB';
             }
 
-            function renderCaseCard(c, grid) {
-                var date = new Date(c.uploadedAt);
+            function getGlobalCaseIndex(c) {
+                // Znajdź globalny indeks sprawy w pełnej tablicy
+                var all = [];
+                if (typeof window._communityCases !== 'undefined' && Array.isArray(window._communityCases)) {
+                    all = window._communityCases;
+                }
+                for (var gi = 0; gi < all.length; gi++) {
+                    if (all[gi] === c || (all[gi].id && c.id && all[gi].id === c.id)) {
+                        return gi;
+                    }
+                }
+                return -1;
+            }
+
+            function renderCaseCard(c, idx, grid) {
+                var date = new Date(c.createdAt || c.uploadedAt || Date.now());
                 var dateStr = date.toLocaleDateString('pl-PL');
                 var badgeColor = c.format === 'pdf' ? '#ef4444' : '#22c55e';
                 var badgeLabel = c.format === 'pdf' ? 'PDF' : 'HTML';
@@ -729,20 +855,23 @@
                 var isLegacy = !c.title;
 
                 if (isLegacy) {
+                    var legacyDate = new Date(c.uploadedAt || Date.now());
+                    var legacyDateStr = legacyDate.toLocaleDateString('pl-PL');
                     card.innerHTML =
                         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
                             '<h3 style="margin-bottom:0;flex:1;">' + escapeHtml(c.name || 'Bez tytułu') + '</h3>' +
                             '<span style="font-size:0.75rem;padding:3px 10px;border-radius:4px;background:' + badgeColor + '20;color:' + badgeColor + ';border:1px solid ' + badgeColor + '40;font-weight:600;">' + badgeLabel + '</span>' +
                         '</div>' +
                         '<p style="font-size:0.95rem;color:var(--text-muted);">Sprawa przesłana w starszym formacie &mdash; brak pełnych danych.</p>' +
-                        '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + dateStr + ' &bull; ' + escapeHtml(c.name || '') + ' (' + formatSize(c.size) + ')</p>' +
-                        '<a href="' + c.data + '" target="_blank" class="btn-action" style="margin-top:10px;" rel="noopener">' +
-                            '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>' +
-                            ' Otwórz teczkę sprawy' +
-                        '</a>';
+                        '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + legacyDateStr + ' &bull; ' + escapeHtml(c.name || '') + ' (' + formatSize(c.size) + ')</p>' +
+                        '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
+                            '<a href="' + c.data + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
+                                '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> Otwórz</a>' +
+                        '</div>';
                 } else {
                     var typeHtml = c.type ? '<p><strong>Typ:</strong> ' + escapeHtml(c.type) + '</p>' : '';
                     var authorHtml = c.author && c.author !== 'Użytkownik społeczności' ? '<p><strong>Autor:</strong> ' + escapeHtml(c.author) + '</p>' : '';
+
                     card.innerHTML =
                         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">' +
                             '<h3 style="margin-bottom:0;flex:1;">' + escapeHtml(c.title) + '</h3>' +
@@ -756,10 +885,12 @@
                         authorHtml +
                         '<p style="margin-top:8px;">' + escapeHtml(c.desc) + '</p>' +
                         '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + dateStr + ' &bull; ' + (c.fileName ? escapeHtml(c.fileName) : '') + ' (' + formatSize(c.size) + ')</p>' +
-                        '<a href="' + c.data + '" target="_blank" class="btn-action" style="margin-top:10px;" rel="noopener">' +
-                            '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>' +
-                            ' Otwórz teczkę sprawy' +
-                        '</a>';
+                        '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
+                            '<a href="' + c.data + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
+                                '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> Otwórz teczkę</a>' +
+                            '<button class="case-edit-btn" data-idx="' + getGlobalCaseIndex(c) + '" data-format="' + (c.format || 'html') + '" title="Edytuj sprawę" style="background:none;border:1px solid var(--border);color:var(--accent);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x270E; Edytuj</button>' +
+                            '<button class="case-del-btn" data-idx="' + getGlobalCaseIndex(c) + '" title="Usuń sprawę" style="background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x2716; Usuń</button>' +
+                        '</div>';
                 }
 
                 grid.appendChild(card);
@@ -768,15 +899,281 @@
             if (pdfCases.length === 0) {
                 pdfGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-title">Brak spraw PDF</div><p>Żadna sprawa w formacie PDF nie została jeszcze opublikowana. Skorzystaj z kreatora w zakładce <strong>Stwórz</strong>, aby przesłać własną!</p></div>';
             } else {
-                pdfCases.forEach(function (c) { renderCaseCard(c, pdfGrid); });
+                pdfCases.forEach(function (c, i) { renderCaseCard(c, i, pdfGrid); });
             }
 
             if (htmlCases.length === 0) {
                 htmlGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-title">Brak spraw HTML</div><p>Żadna sprawa w formacie HTML nie została jeszcze opublikowana. Skorzystaj z kreatora w zakładce <strong>Stwórz</strong>, aby przesłać własną!</p></div>';
             } else {
-                htmlCases.forEach(function (c) { renderCaseCard(c, htmlGrid); });
+                htmlCases.forEach(function (c, i) { renderCaseCard(c, i, htmlGrid); });
             }
-        };
+
+            // Dodaj handler usuwania z kodem
+            document.querySelectorAll('.case-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    showCommunityDeleteModal('temat', idx);
+                });
+            });
+
+            // Dodaj handler edycji z kodem
+            document.querySelectorAll('.case-edit-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var idx = parseInt(this.getAttribute('data-idx'));
+                    showCommunityEditModal(idx);
+                });
+            });
+        }
+
+        // ============================================
+        // COMMUNITY CASES — delete/edit with code
+        // ============================================
+        function showCommunityDeleteCodeDisplay(code) {
+            var modal = document.getElementById('deleteCodeDisplayModal');
+            var display = document.getElementById('deleteCodeDisplay');
+            var closeBtn = document.getElementById('deleteCodeDisplayCloseBtn');
+            if (!modal || !display) return;
+
+            display.textContent = code;
+            modal.style.display = 'flex';
+
+            // Zapisz kod w przeglądarce
+            try {
+                var saved = JSON.parse(localStorage.getItem('md_case_codes') || '{}');
+                saved['last'] = code;
+                localStorage.setItem('md_case_codes', JSON.stringify(saved));
+            } catch(e) {}
+
+            function close() {
+                modal.style.display = 'none';
+                closeBtn.removeEventListener('click', close);
+            }
+            closeBtn.addEventListener('click', close);
+        }
+
+        function getCaseCode(caseId) {
+            if (!caseId) return null;
+            try {
+                var saved = JSON.parse(localStorage.getItem('md_case_codes') || '{}');
+                return saved[caseId] || saved['last'] || null;
+            } catch(e) { return null; }
+        }
+
+        function saveCaseCode(caseId, code) {
+            if (!caseId || !code) return;
+            try {
+                var saved = JSON.parse(localStorage.getItem('md_case_codes') || '{}');
+                saved[caseId] = code;
+                saved['last'] = code;
+                localStorage.setItem('md_case_codes', JSON.stringify(saved));
+            } catch(e) {}
+        }
+
+        function removeCaseCode(caseId) {
+            if (!caseId) return;
+            try {
+                var saved = JSON.parse(localStorage.getItem('md_case_codes') || '{}');
+                delete saved[caseId];
+                localStorage.setItem('md_case_codes', JSON.stringify(saved));
+            } catch(e) {}
+        }
+
+        function showCommunityDeleteModal(idx) {
+            // Pobierz sprawy (z obu źródeł)
+            var allCases = [];
+            if (typeof window._communityCases !== 'undefined' && Array.isArray(window._communityCases)) {
+                allCases = window._communityCases;
+            } else {
+                try { allCases = JSON.parse(localStorage.getItem('md_community_cases') || '[]'); } catch(e) {}
+            }
+
+            var c = allCases[idx];
+            if (!c) {
+                showToast('Nie znaleziono sprawy.', 'error', 3000);
+                return;
+            }
+
+            var modal = document.getElementById('deleteCodeModal');
+            var input = document.getElementById('deleteCodeInput');
+            var feedback = document.getElementById('deleteCodeFeedback');
+            var confirmBtn = document.getElementById('deleteCodeConfirmBtn');
+            var cancelBtn = document.getElementById('deleteCodeCancelBtn');
+            var title = document.getElementById('deleteModalTitle');
+            var desc = document.getElementById('deleteModalDesc');
+
+            if (!modal || !input) return;
+
+            title.textContent = 'Usuń sprawę społeczności';
+            desc.textContent = 'Aby usunąć tę sprawę, wpisz kod usuwania, który otrzymałeś przy publikacji.';
+
+            // Auto-uzupełnij kod
+            var savedCode = c.id ? getCaseCode(c.id) : getCaseCode('last');
+            input.value = savedCode || '';
+            feedback.textContent = savedCode ? 'Kod automatycznie wczytany' : '';
+            feedback.className = savedCode ? 'field-feedback success' : 'field-feedback';
+            modal.style.display = 'flex';
+
+            function cleanup() {
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            }
+
+            function handleConfirm() {
+                var code = input.value.trim().toUpperCase();
+                if (!code) {
+                    feedback.textContent = 'Wpisz kod usuwania.';
+                    feedback.className = 'field-feedback error';
+                    return;
+                }
+
+                // Wyślij do API
+                if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postCaseAction) {
+                    GitHubAPI.postCaseAction('delete', {
+                        caseIdx: idx,
+                        code: code
+                    }, function(err) {
+                        cleanup();
+                        if (err) {
+                            showToast('Błąd: ' + err, 'error', 5000);
+                        } else {
+                            showToast('Sprawa została usunięta.', 'success', 4000);
+                            if (c.id) removeCaseCode(c.id);
+                            loadCommunityCases();
+                        }
+                    });
+                } else {
+                    // Fallback: usuń z localStorage
+                    cleanup();
+                    if (c.id && c.id.toString().indexOf('local') !== -1) {
+                        // Lokalna sprawa — tylko admin bypass
+                        if (code === 'ADMIN') {
+                            var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                            local.splice(idx, 1);
+                            localStorage.setItem('md_community_cases', JSON.stringify(local));
+                            showToast('Sprawa usunięta lokalnie.', 'info', 3000);
+                            loadCommunityCases();
+                        } else {
+                            showToast('Nieprawidłowy kod (tryb offline: ADMIN).', 'error', 4000);
+                        }
+                    } else {
+                        showToast('API niedostępne — nie można usunąć.', 'error', 4000);
+                    }
+                }
+            }
+
+            function handleCancel() {
+                cleanup();
+            }
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+
+            input.addEventListener('keydown', function onEnter(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirm();
+                }
+            });
+
+            setTimeout(function() { input.focus(); }, 100);
+        }
+
+        function showCommunityEditModal(idx) {
+            var allCases = [];
+            if (typeof window._communityCases !== 'undefined' && Array.isArray(window._communityCases)) {
+                allCases = window._communityCases;
+            } else {
+                try { allCases = JSON.parse(localStorage.getItem('md_community_cases') || '[]'); } catch(e) {}
+            }
+
+            var c = allCases[idx];
+            if (!c) {
+                showToast('Nie znaleziono sprawy.', 'error', 3000);
+                return;
+            }
+
+            var modal = document.getElementById('deleteCodeModal');
+            var input = document.getElementById('deleteCodeInput');
+            var feedback = document.getElementById('deleteCodeFeedback');
+            var confirmBtn = document.getElementById('deleteCodeConfirmBtn');
+            var cancelBtn = document.getElementById('deleteCodeCancelBtn');
+            var mTitle = document.getElementById('deleteModalTitle');
+            var mDesc = document.getElementById('deleteModalDesc');
+
+            if (!modal || !input) return;
+
+            mTitle.textContent = 'Edytuj sprawę społeczności';
+            mDesc.textContent = 'Aby edytować sprawę, wpisz kod otrzymany przy publikacji. Po weryfikacji zostaniesz przeniesiony do formularza.';
+
+            var savedCode = c.id ? getCaseCode(c.id) : getCaseCode('last');
+            input.value = savedCode || '';
+            feedback.textContent = savedCode ? 'Kod automatycznie wczytany' : '';
+            feedback.className = savedCode ? 'field-feedback success' : 'field-feedback';
+            modal.style.display = 'flex';
+
+            function cleanup() {
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            }
+
+            function handleConfirm() {
+                var code = input.value.trim().toUpperCase();
+                if (!code) {
+                    feedback.textContent = 'Wpisz kod edycji.';
+                    feedback.className = 'field-feedback error';
+                    return;
+                }
+
+                cleanup();
+
+                // Ustaw flagę edycji — submit handler wyśle EDIT zamiast CREATE
+                window._editingCase = { idx: idx, code: code };
+
+                // Wypełnij formularz danymi sprawy
+                var titleField = document.getElementById('ccTitle');
+                var sygnaturaField = document.getElementById('ccSygnatura');
+                var courtField = document.getElementById('ccCourt');
+                var typeField = document.getElementById('ccType');
+                var powerField = document.getElementById('ccPower');
+                var defendantField = document.getElementById('ccDefendant');
+                var descField = document.getElementById('ccDesc');
+                var authorField = document.getElementById('ccAuthor');
+                var formContainer = document.getElementById('creatorFormContainer');
+
+                if (titleField) titleField.value = c.title || '';
+                if (sygnaturaField) sygnaturaField.value = c.sygnatura || '';
+                if (courtField) courtField.value = c.court || '';
+                if (typeField) typeField.value = c.type || '';
+                if (powerField) powerField.value = c.power || '';
+                if (defendantField) defendantField.value = c.defendant || '';
+                if (descField) descField.value = c.desc || '';
+                if (authorField) authorField.value = c.author || '';
+
+                if (formContainer) formContainer.style.display = 'block';
+                formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                showToast('Dane sprawy wczytane. Zmodyfikuj i wyślij formularz, aby zaktualizować.', 'info', 5000);
+            }
+
+            function handleCancel() {
+                window._editingCase = null;
+                cleanup();
+            }
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+
+            input.addEventListener('keydown', function onEnter(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirm();
+                }
+            });
+
+            setTimeout(function() { input.focus(); }, 100);
+        }
 
         // Dynamic nav height tracking
         function updateNavHeight() {
@@ -1334,10 +1731,13 @@
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
                         var tIdx = parseInt(this.getAttribute('data-idx'));
+                        var topicId = topics[tIdx] ? topics[tIdx].id : null;
                         showDeleteCodeModal('temat', tIdx, null, function() {
                             var deleteCode = document.getElementById('deleteCodeInput').value.trim().toUpperCase();
                             // Lokalnie usuń
                             topics.splice(tIdx, 1);
+                            // Usuń zapisany kod
+                            if (topicId) removeSavedDeleteCode(topicId);
                             saveTopics();
                             renderTopics();
                             showToast('Usuwanie tematu...', 'info', 2000);
@@ -1470,6 +1870,36 @@
             }
 
             // ============================================
+            // SAVE / LOAD DELETE CODES (przechowywane jak hasła w przeglądarce)
+            // ============================================
+            function saveDeleteCode(topicId, code) {
+                if (!topicId || !code) return;
+                try {
+                    var saved = JSON.parse(localStorage.getItem('md_forum_codes') || '{}');
+                    saved[topicId] = code;
+                    localStorage.setItem('md_forum_codes', JSON.stringify(saved));
+                } catch(e) {}
+            }
+
+            function getSavedDeleteCode(topicId) {
+                if (!topicId) return null;
+                try {
+                    var saved = JSON.parse(localStorage.getItem('md_forum_codes') || '{}');
+                    return saved[topicId] || null;
+                } catch(e) { return null; }
+            }
+
+            // Sprzątanie kodu dla usuniętego tematu
+            function removeSavedDeleteCode(topicId) {
+                if (!topicId) return;
+                try {
+                    var saved = JSON.parse(localStorage.getItem('md_forum_codes') || '{}');
+                    delete saved[topicId];
+                    localStorage.setItem('md_forum_codes', JSON.stringify(saved));
+                } catch(e) {}
+            }
+
+            // ============================================
             // DELETE CODE MODAL SYSTEM
             // ============================================
             function showDeleteCodeModal(type, tIdx, rIdx, onSuccess) {
@@ -1485,9 +1915,17 @@
 
                 title.textContent = 'Usuń ' + type;
                 desc.textContent = 'Aby usunąć ten ' + type + ', wpisz kod usuwania, który otrzymałeś przy tworzeniu.';
-                input.value = '';
-                feedback.textContent = '';
-                feedback.className = 'field-feedback';
+
+                // Auto-uzupełnij kod z localStorage (jeśli zapamiętany)
+                var savedCode = null;
+                var topic = topics[tIdx];
+                if (topic && topic.id) {
+                    savedCode = getSavedDeleteCode(topic.id);
+                }
+
+                input.value = savedCode || '';
+                feedback.textContent = savedCode ? '&#x1F512; Kod automatycznie wczytany z zapisanego' : '';
+                feedback.className = savedCode ? 'field-feedback success' : 'field-feedback';
                 modal.style.display = 'flex';
 
                 function cleanup() {
@@ -1548,7 +1986,7 @@
                 setTimeout(function() { input.focus(); }, 100);
             }
 
-            function showDeleteCodeDisplay(code) {
+            function showDeleteCodeDisplay(code, topicId) {
                 var modal = document.getElementById('deleteCodeDisplayModal');
                 var display = document.getElementById('deleteCodeDisplay');
                 var closeBtn = document.getElementById('deleteCodeDisplayCloseBtn');
@@ -1556,6 +1994,16 @@
 
                 display.textContent = code;
                 modal.style.display = 'flex';
+
+                // Zapisz kod automatycznie, jeśli mamy ID tematu
+                if (code && topicId) {
+                    saveDeleteCode(topicId, code);
+                } else if (code) {
+                    // Dla starszych tematów — zapisz pod kluczem 'last'
+                    try {
+                        localStorage.setItem('md_last_forum_code', code);
+                    } catch(e) {}
+                }
 
                 function close() {
                     modal.style.display = 'none';
@@ -1623,9 +2071,11 @@
                     }
                     if (hasError) return;
 
-                    // Kod wygeneruje serwer — nie zapisuj go lokalnie
-                    // (po refreshTopics() zostanie zastąpiony wersją z serwera)
+                    // Tymczasowe ID — zostanie zastąpione danymi z serwera po refreshTopics()
+                    var tempId = Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+
                     topics.unshift({
+                        id: tempId,
                         title: title.value.trim(),
                         content: content.value.trim(),
                         createdAt: new Date().toISOString(),
@@ -1645,18 +2095,36 @@
                             if (err) {
                                 showToast('Temat dodany lokalnie. Błąd synchronizacji: ' + err, 'info', 5000);
                             } else {
-                                var serverCode = result && result.deleteCode ? result.deleteCode : deleteCode;
+                                var serverCode = result && result.deleteCode ? result.deleteCode : 'BŁĄD-KODU';
                                 showToast('Temat został opublikowany na forum!', 'success', 4000);
-                                showDeleteCodeDisplay(serverCode);
+                                showDeleteCodeDisplay(serverCode, tempId);
+                                // Zapisz kod w przeglądarce (jak hasło)
+                                saveDeleteCode(tempId, serverCode);
                                 // Odśwież dane z serwera
                                 refreshTopics(function() {
+                                    // Migruj zapisany kod z tempId na serwerowe ID
+                                    // Używamy ID z odpowiedzi API (result.topic.id) — najbezpieczniejsze
+                                    var realId = result && result.topic ? result.topic.id : null;
+                                    if (!realId && topics.length > 0 && topics[0] && topics[0].id) {
+                                        realId = topics[0].id;
+                                    }
+                                    if (realId) {
+                                        saveDeleteCode(realId, serverCode);
+                                        removeSavedDeleteCode(tempId);
+                                    }
                                     renderTopics();
                                 });
                             }
                         });
                     } else {
+                        // Tryb offline — wygeneruj kod lokalnie
+                        var offlineCode = GitHubAPI && GitHubAPI.generateDeleteCode ? GitHubAPI.generateDeleteCode() : 'ADMIN';
                         showToast('Temat dodany lokalnie (tryb offline)', 'info', 4000);
-                        showDeleteCodeDisplay(deleteCode);
+                        showDeleteCodeDisplay(offlineCode);
+                        // Zapisz kod lokalnie
+                        topics[0].privateCode = offlineCode;
+                        saveTopics();
+                        saveDeleteCode(tempId, offlineCode);
                     }
 
                     topicForm.reset();

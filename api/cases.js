@@ -1,5 +1,5 @@
 // ============================================
-// Forum API — Vercel Serverless Function
+// Community Cases API — Vercel Serverless Function
 // ============================================
 // Wymagane zmienne środowiskowe w Vercel:
 //   GITHUB_TOKEN  — Personal Access Token (classic) z zakresem 'public_repo'
@@ -7,7 +7,7 @@
 // ============================================
 
 const GITHUB_API = 'https://api.github.com';
-const FILE_PATH = 'forum/topics.json';
+const FILE_PATH = 'spolecznosc/manifest.json';
 
 export default async function handler(req, res) {
     // CORS
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const repo = process.env.GITHUB_REPO;
 
     if (!token || !repo) {
-        return res.status(500).json({ error: 'Brak konfiguracji GITHUB_TOKEN lub GITHUB_REPO w zmiennych środowiskowych Vercel.' });
+        return res.status(500).json({ error: 'Brak konfiguracji GITHUB_TOKEN lub GITHUB_REPO.' });
     }
 
     const headers = {
@@ -33,12 +33,10 @@ export default async function handler(req, res) {
     };
 
     try {
-        // GET — pobierz tematy
         if (req.method === 'GET') {
             return await handleGet(req, res, headers, repo);
         }
 
-        // POST — akcje
         if (req.method === 'POST') {
             return await handlePost(req, res, headers, repo);
         }
@@ -51,11 +49,10 @@ export default async function handler(req, res) {
 }
 
 // ============================================
-// GET — odczytaj forum/topics.json z GitHub
+// GET — odczytaj spolecznosc/manifest.json
 // ============================================
 async function handleGet(req, res, headers, repo) {
     const url = `${GITHUB_API}/repos/${repo}/contents/${FILE_PATH}`;
-
     const response = await fetch(url, { headers });
 
     if (response.status === 404) {
@@ -69,81 +66,88 @@ async function handleGet(req, res, headers, repo) {
     }
 
     const data = await response.json();
-    // GitHub API zwraca content zakodowany base64
     const content = JSON.parse(Buffer.from(data.content, 'base64').toString('utf-8'));
 
     return res.status(200).json(content);
 }
 
 // ============================================
-// POST — akcje: create, delete, reply
+// POST — akcje: create, delete, edit
 // ============================================
 async function handlePost(req, res, headers, repo) {
-    const action = req.query.action || req.body?.action;
+    const action = req.body?.action || req.query.action;
 
     if (!action) {
-        return res.status(400).json({ error: 'Brak parametru action (create/delete/reply)' });
+        return res.status(400).json({ error: 'Brak parametru action (create/delete/edit)' });
     }
 
-    // Najpierw pobierz obecny plik (żeby dostać SHA)
+    // Pobierz obecny manifest
     const fileUrl = `${GITHUB_API}/repos/${repo}/contents/${FILE_PATH}`;
     const getResp = await fetch(fileUrl, { headers });
     let sha = null;
-    let topics = [];
+    let cases = [];
 
     if (getResp.ok) {
         const fileData = await getResp.json();
         sha = fileData.sha;
-        topics = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf-8'));
+        cases = JSON.parse(Buffer.from(fileData.content, 'base64').toString('utf-8'));
     }
 
-    // Upewnij się, że topics to tablica
-    if (!Array.isArray(topics)) topics = [];
+    if (!Array.isArray(cases)) cases = [];
 
     switch (action) {
         case 'create':
-            return await handleCreate(req, res, headers, repo, topics, sha, fileUrl);
+            return await handleCreate(req, res, headers, repo, cases, sha, fileUrl);
         case 'delete':
-            return await handleDelete(req, res, headers, repo, topics, sha, fileUrl);
-        case 'reply':
-            return await handleReply(req, res, headers, repo, topics, sha, fileUrl);
+            return await handleDelete(req, res, headers, repo, cases, sha, fileUrl);
+        case 'edit':
+            return await handleEdit(req, res, headers, repo, cases, sha, fileUrl);
         default:
             return res.status(400).json({ error: 'Nieznana akcja: ' + action });
     }
 }
 
 // ============================================
-// CREATE — nowy temat
+// CREATE — dodaj nową sprawę społeczności
 // ============================================
-async function handleCreate(req, res, headers, repo, topics, sha, fileUrl) {
-    const { title, content } = req.body || {};
-    if (!title || !content) {
-        return res.status(400).json({ error: 'Tytuł i treść są wymagane' });
+async function handleCreate(req, res, headers, repo, cases, sha, fileUrl) {
+    const { title, sygnatura, court, type, power, defendant, desc, author, format, fileName, data, size } = req.body || {};
+
+    if (!title || !sygnatura || !court || !desc) {
+        return res.status(400).json({ error: 'Tytuł, sygnatura, sąd i opis są wymagane' });
     }
 
-    // Generuj kod usuwania (bez '0', 'O', '1', 'I' — żeby uniknąć pomyłek)
+    // Generuj kod usuwania
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let deleteCode = '';
     for (let i = 0; i < 8; i++) {
         deleteCode += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    // Generuj unikalne ID (timestamp + 4 losowe znaki)
-    const topicId = Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+    // Unikalne ID
+    const caseId = Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-    const newTopic = {
-        id: topicId,
+    const newCase = {
+        id: caseId,
         title: title.trim(),
-        content: content.trim(),
+        sygnatura: sygnatura.trim(),
+        court: court.trim(),
+        type: type || 'Inna',
+        power: power || '',
+        defendant: defendant || '',
+        desc: desc.trim(),
+        author: author || 'Użytkownik społeczności',
+        format: format || 'html',
+        fileName: fileName || '',
+        data: data || '',  // base64 data URL
+        size: size || 0,
         createdAt: new Date().toISOString(),
-        replies: [],
         privateCode: deleteCode
     };
 
-    topics.unshift(newTopic);
+    cases.unshift(newCase);
 
-    // Zapisz do GitHub
-    const commitResult = await commitFile(headers, fileUrl, topics, sha, 'Dodano temat: ' + title.trim());
+    const commitResult = await commitFile(headers, fileUrl, cases, sha, 'Dodano sprawę: ' + title.trim());
 
     if (!commitResult.success) {
         return res.status(500).json({ error: commitResult.error || 'Błąd zapisu do GitHub' });
@@ -151,50 +155,36 @@ async function handleCreate(req, res, headers, repo, topics, sha, fileUrl) {
 
     return res.status(201).json({
         success: true,
-        id: 0, // indeks w tablicy (0, bo unshift)
         deleteCode: deleteCode,
-        topic: newTopic
+        caseData: newCase
     });
 }
 
 // ============================================
-// DELETE — usuń temat lub odpowiedź
+// DELETE — usuń sprawę (wymaga kodu)
 // ============================================
-async function handleDelete(req, res, headers, repo, topics, sha, fileUrl) {
-    const { topicIdx, replyIdx, code } = req.body || {};
+async function handleDelete(req, res, headers, repo, cases, sha, fileUrl) {
+    const { caseIdx, code } = req.body || {};
 
-    if (topicIdx === undefined || topicIdx === null) {
-        return res.status(400).json({ error: 'Brak topicIdx' });
+    if (caseIdx === undefined || caseIdx === null) {
+        return res.status(400).json({ error: 'Brak caseIdx' });
     }
 
-    const idx = parseInt(topicIdx);
-    if (idx < 0 || idx >= topics.length) {
-        return res.status(404).json({ error: 'Nie znaleziono tematu' });
+    const idx = parseInt(caseIdx);
+    if (idx < 0 || idx >= cases.length) {
+        return res.status(404).json({ error: 'Nie znaleziono sprawy' });
     }
 
-    const topic = topics[idx];
+    const caseItem = cases[idx];
 
     // Weryfikacja kodu
-    if (replyIdx === undefined || replyIdx === null) {
-        // Usuwanie tematu
-        if (topic.privateCode && code !== topic.privateCode) {
-            return res.status(403).json({ error: 'Nieprawidłowy kod usuwania' });
-        }
-        topics.splice(idx, 1);
-    } else {
-        // Usuwanie odpowiedzi
-        const rIdx = parseInt(replyIdx);
-        if (!topic.replies || rIdx < 0 || rIdx >= topic.replies.length) {
-            return res.status(404).json({ error: 'Nie znaleziono odpowiedzi' });
-        }
-        // Dla odpowiedzi też sprawdź kod tematu
-        if (topic.privateCode && code !== topic.privateCode) {
-            return res.status(403).json({ error: 'Nieprawidłowy kod usuwania' });
-        }
-        topic.replies.splice(rIdx, 1);
+    if (caseItem.privateCode && code !== caseItem.privateCode) {
+        return res.status(403).json({ error: 'Nieprawidłowy kod usuwania' });
     }
 
-    const commitResult = await commitFile(headers, fileUrl, topics, sha, 'Usunięto wpis na forum');
+    cases.splice(idx, 1);
+
+    const commitResult = await commitFile(headers, fileUrl, cases, sha, 'Usunięto sprawę społeczności: ' + caseItem.title);
 
     if (!commitResult.success) {
         return res.status(500).json({ error: commitResult.error || 'Błąd zapisu do GitHub' });
@@ -204,44 +194,53 @@ async function handleDelete(req, res, headers, repo, topics, sha, fileUrl) {
 }
 
 // ============================================
-// REPLY — dodaj odpowiedź
+// EDIT — edytuj sprawę (wymaga kodu)
 // ============================================
-async function handleReply(req, res, headers, repo, topics, sha, fileUrl) {
-    const { topicIdx, content } = req.body || {};
+async function handleEdit(req, res, headers, repo, cases, sha, fileUrl) {
+    const { caseIdx, code, title, sygnatura, court, type, power, defendant, desc, author, data } = req.body || {};
 
-    if (topicIdx === undefined || topicIdx === null) {
-        return res.status(400).json({ error: 'Brak topicIdx' });
-    }
-    if (!content) {
-        return res.status(400).json({ error: 'Treść odpowiedzi jest wymagana' });
+    if (caseIdx === undefined || caseIdx === null) {
+        return res.status(400).json({ error: 'Brak caseIdx' });
     }
 
-    const idx = parseInt(topicIdx);
-    if (idx < 0 || idx >= topics.length) {
-        return res.status(404).json({ error: 'Nie znaleziono tematu' });
+    const idx = parseInt(caseIdx);
+    if (idx < 0 || idx >= cases.length) {
+        return res.status(404).json({ error: 'Nie znaleziono sprawy' });
     }
 
-    if (!topics[idx].replies) topics[idx].replies = [];
+    const caseItem = cases[idx];
 
-    topics[idx].replies.push({
-        content: content.trim(),
-        createdAt: new Date().toISOString()
-    });
+    // Weryfikacja kodu
+    if (caseItem.privateCode && code !== caseItem.privateCode) {
+        return res.status(403).json({ error: 'Nieprawidłowy kod edycji' });
+    }
 
-    const commitResult = await commitFile(headers, fileUrl, topics, sha, 'Dodano odpowiedź w temacie: ' + topics[idx].title);
+    // Aktualizuj pola (tylko podane)
+    if (title) caseItem.title = title.trim();
+    if (sygnatura) caseItem.sygnatura = sygnatura.trim();
+    if (court) caseItem.court = court.trim();
+    if (type) caseItem.type = type;
+    if (power !== undefined) caseItem.power = power;
+    if (defendant !== undefined) caseItem.defendant = defendant;
+    if (desc) caseItem.desc = desc.trim();
+    if (author !== undefined) caseItem.author = author || 'Użytkownik społeczności';
+    if (data) caseItem.data = data;
+    caseItem.modifiedAt = new Date().toISOString();
+
+    const commitResult = await commitFile(headers, fileUrl, cases, sha, 'Edytowano sprawę: ' + caseItem.title);
 
     if (!commitResult.success) {
         return res.status(500).json({ error: commitResult.error || 'Błąd zapisu do GitHub' });
     }
 
-    return res.status(201).json({ success: true });
+    return res.status(200).json({ success: true, caseData: caseItem });
 }
 
 // ============================================
 // Pomocnik: commit pliku do GitHub
 // ============================================
-async function commitFile(headers, fileUrl, topics, sha, message) {
-    const content = Buffer.from(JSON.stringify(topics, null, 2)).toString('base64');
+async function commitFile(headers, fileUrl, data, sha, message) {
+    const content = Buffer.from(JSON.stringify(data, null, 2)).toString('base64');
 
     const body = {
         message: message + ' (' + new Date().toLocaleString('pl-PL') + ')',
