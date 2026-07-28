@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 
     const token = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO;
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Materiadowodowa@2026';
 
     if (!token || !repo) {
         return res.status(500).json({ error: 'Brak konfiguracji GITHUB_TOKEN lub GITHUB_REPO.' });

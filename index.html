@@ -970,7 +970,7 @@
         <footer class="page-footer">
             <div class="page-footer-inner">
                 &copy; 2026 <span>Materia Dowodowa</span>. Wszelkie prawa zastrzeżone. Symulacja prawno-gospodarcza.
-                <span id="adminPanelBtn" title="Panel administratora" style="display:inline-block;margin-left:12px;cursor:pointer;opacity:0.2;font-size:0.75rem;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='0.2'">&#x2699;</span>
+                <span id="adminPanelBtn" title="Panel administratora" onclick="toggleAdminPanel()" style="display:inline-block;margin-left:12px;cursor:pointer;opacity:0.2;font-size:0.75rem;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='0.2'">&#x2699;</span>
             </div>
         </footer>
     </main>
@@ -1006,7 +1006,138 @@
         </div>
     </div>
 
-<!-- Admin panel tworzony dynamicznie w JS (getOrCreateAdminPanel) -->
+<!-- ========== ADMIN PANEL ========== -->
+<div id="adminPanel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;padding:40px 20px;">
+    <div style="max-width:800px;margin:0 auto;background:var(--surface);border-radius:var(--rs);padding:40px;border:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+            <h2 style="margin:0;color:var(--accent);font-weight:700;">&#x2699; Panel Administratora</h2>
+            <button onclick="document.getElementById('adminPanel').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">&times;</button>
+        </div>
+        <div class="card" style="margin-bottom:24px;">
+            <h3 style="margin-bottom:16px;">Dodaj oficjaln&#x105; spraw&#x119;</h3>
+            <div class="form-group"><label for="adminCaseTitle">Tytu&#x142; sprawy</label><input type="text" id="adminCaseTitle" placeholder="Np. Sprawa nr 04/2026"></div>
+            <div class="form-group"><label for="adminCaseSygnatura">Sygnatura</label><input type="text" id="adminCaseSygnatura" placeholder="Np. IV GC 316/26"></div>
+            <div class="form-group"><label for="adminCaseDesc">Opis sprawy</label><textarea id="adminCaseDesc" rows="2" placeholder="Kr&oacute;tki opis..."></textarea></div>
+            <div class="form-group"><label for="adminCaseFile">Plik HTML z teczk&#x105; sprawy</label><input type="file" id="adminCaseFile" accept=".html"></div>
+            <div style="display:flex;gap:10px;margin-top:10px;"><button class="btn-action" id="adminAddCaseBtn" type="button" onclick="handleAdminAddCase()">Opublikuj spraw&#x119;</button></div>
+            <p id="adminCaseFeedback" style="margin-top:10px;font-size:0.9rem;"></p>
+        </div>
+        <div class="card">
+            <h3 style="margin-bottom:16px;">Dodaj generator</h3>
+            <div class="form-group"><label for="adminGenTitle">Nazwa generatora</label><input type="text" id="adminGenTitle" placeholder="Np. Generator pism kancelarii XYZ"></div>
+            <div class="form-group"><label for="adminGenDesc">Opis</label><textarea id="adminGenDesc" rows="2" placeholder="Kr&oacute;tki opis..."></textarea></div>
+            <div class="form-group"><label for="adminGenFile">Plik HTML generatora</label><input type="file" id="adminGenFile" accept=".html"></div>
+            <div style="display:flex;gap:10px;margin-top:10px;"><button class="btn-action" id="adminAddGeneratorBtn" type="button" onclick="handleAdminAddGenerator()">Opublikuj generator</button></div>
+            <p id="adminGenFeedback" style="margin-top:10px;font-size:0.9rem;"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+// === ADMIN PANEL — wbudowany, niezalezny od app.js ===
+function getAdminApiUrl() {
+    var host = window.location.hostname;
+    if (host.indexOf('vercel.app') !== -1 || host.indexOf('localhost') !== -1 || host === '127.0.0.1') {
+        return '/api/admin';
+    }
+    var base = (typeof FORUM_CONFIG !== 'undefined' && FORUM_CONFIG.vercelApiUrl) ? FORUM_CONFIG.vercelApiUrl : '/api/admin';
+    return base + '/api/admin';
+}
+function toggleAdminPanel() {
+    var p = document.getElementById('adminPanel');
+    if (!p) return;
+    // Jesli panel jest otwarty — zamknij bez hasla
+    if (p.style.display === 'block') {
+        p.style.display = 'none';
+        return;
+    }
+    // Jesli zamkniety — zapytaj o haslo
+    var pw = prompt('Podaj haslo administratora:');
+    if (pw === 'Materiadowodowa@2026') {
+        p.style.display = 'block';
+    } else if (pw !== null) {
+        alert('Nieprawidlowe haslo!');
+    }
+}
+function adminFeedback(el, msg, type) {
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = type === 'ok' ? '#22c55e' : (type === 'err' ? '#ef4444' : 'inherit');
+}
+function handleAdminAddCase() {
+    var t = document.getElementById('adminCaseTitle');
+    var s = document.getElementById('adminCaseSygnatura');
+    var d = document.getElementById('adminCaseDesc');
+    var f = document.getElementById('adminCaseFile');
+    var fb = document.getElementById('adminCaseFeedback');
+    if (!t || !t.value.trim()) { adminFeedback(fb, 'Wpisz tytul.', 'err'); return; }
+    if (!f || !f.files || !f.files[0]) { adminFeedback(fb, 'Wybierz plik HTML.', 'err'); return; }
+    var file = f.files[0];
+    if (!file.name.toLowerCase().endsWith('.html')) { adminFeedback(fb, 'Tylko pliki HTML.', 'err'); return; }
+    adminFeedback(fb, 'Wysylanie...', '');
+    var btn = document.getElementById('adminAddCaseBtn');
+    btn.disabled = true;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        var pw = prompt('Podaj haslo administratora:');
+        if (!pw) { adminFeedback(fb, 'Anulowano.', ''); btn.disabled = false; return; }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', getAdminApiUrl(), true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            btn.disabled = false;
+            if (xhr.status >= 200 && xhr.status < 300) {
+                adminFeedback(fb, 'OK! Opublikowane.', 'ok');
+                t.value = ''; if(s) s.value = ''; if(d) d.value = ''; f.value = '';
+                alert('Sprawa dodana do repozytorium!');
+            } else {
+                var em = 'Blad (HTTP ' + xhr.status + ')';
+                try { var j = JSON.parse(xhr.responseText); if (j.error) em = j.error; } catch(e) {}
+                adminFeedback(fb, em, 'err');
+            }
+        };
+        xhr.onerror = function() { btn.disabled = false; adminFeedback(fb, 'Blad sieci.', 'err'); };
+        xhr.send(JSON.stringify({ action: 'addCase', password: pw, title: t.value.trim(), sygnatura: s ? s.value.trim() : '', desc: d ? d.value.trim() : '', htmlContent: ev.target.result }));
+    };
+    reader.readAsText(file);
+}
+function handleAdminAddGenerator() {
+    var t = document.getElementById('adminGenTitle');
+    var d = document.getElementById('adminGenDesc');
+    var f = document.getElementById('adminGenFile');
+    var fb = document.getElementById('adminGenFeedback');
+    if (!t || !t.value.trim()) { adminFeedback(fb, 'Wpisz nazwe generatora.', 'err'); return; }
+    if (!f || !f.files || !f.files[0]) { adminFeedback(fb, 'Wybierz plik HTML.', 'err'); return; }
+    var file = f.files[0];
+    if (!file.name.toLowerCase().endsWith('.html')) { adminFeedback(fb, 'Tylko pliki HTML.', 'err'); return; }
+    adminFeedback(fb, 'Wysylanie...', '');
+    var btn = document.getElementById('adminAddGeneratorBtn');
+    btn.disabled = true;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        var pw = prompt('Podaj haslo administratora:');
+        if (!pw) { adminFeedback(fb, 'Anulowano.', ''); btn.disabled = false; return; }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', getAdminApiUrl(), true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            btn.disabled = false;
+            if (xhr.status >= 200 && xhr.status < 300) {
+                adminFeedback(fb, 'OK! Opublikowane.', 'ok');
+                t.value = ''; if(d) d.value = ''; f.value = '';
+                alert('Generator dodany do repozytorium!');
+            } else {
+                var em = 'Blad (HTTP ' + xhr.status + ')';
+                try { var j = JSON.parse(xhr.responseText); if (j.error) em = j.error; } catch(e) {}
+                adminFeedback(fb, em, 'err');
+            }
+        };
+        xhr.onerror = function() { btn.disabled = false; adminFeedback(fb, 'Blad sieci.', 'err'); };
+        xhr.send(JSON.stringify({ action: 'addGenerator', password: pw, title: t.value.trim(), desc: d ? d.value.trim() : '', htmlContent: ev.target.result }));
+    };
+    reader.readAsText(file);
+}
+</script>
 
 </body>
 
