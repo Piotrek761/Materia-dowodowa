@@ -2458,6 +2458,26 @@
                 }
             });
 
+            // ============================================
+            // HIDDEN BUTTON: kliknij &#x2699; w stopce — aktywacja panelu admina
+            // ============================================
+            var adminBtn = document.getElementById('adminPanelBtn');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', function() {
+                    var panel = document.getElementById('adminPanel');
+                    if (panel) {
+                        var curDisplay = panel.style.display;
+                        if (curDisplay === 'none' || curDisplay === '') {
+                            panel.style.display = 'block';
+                            showToast('Panel administratora aktywowany', 'info', 3000);
+                        } else {
+                            panel.style.display = 'none';
+                            showToast('Panel administratora zamknięty', 'info', 2000);
+                        }
+                    }
+                });
+            }
+
             // Admin API helper — wzorowana na GitHubAPI
             function getAdminUrl() {
                 var host = window.location.hostname;
