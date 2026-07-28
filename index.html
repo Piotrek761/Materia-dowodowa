@@ -1005,6 +1005,63 @@
         </div>
     </div>
 
+    <!-- ============================================
+    // UKRYTY PANEL ADMINISTRATORA
+    // Aktywacja: kliknij logo 5 razy
+    // ============================================
+    <div id="adminPanel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;padding:40px 20px;">
+        <div style="max-width:800px;margin:0 auto;background:var(--surface);border-radius:var(--rs);padding:40px;border:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+                <h2 style="margin:0;color:var(--accent);font-family:'Open Sans';font-weight:700;">&#x2699; Panel Administratora</h2>
+                <button onclick="document.getElementById('adminPanel').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+
+            <div class="card" style="margin-bottom:24px;">
+                <h3 style="margin-bottom:16px;">Dodaj oficjalną sprawę</h3>
+                <div class="form-group">
+                    <label for="adminCaseTitle">Tytuł sprawy</label>
+                    <input type="text" id="adminCaseTitle" placeholder="Np. Sprawa nr 04/2026">
+                </div>
+                <div class="form-group">
+                    <label for="adminCaseSygnatura">Sygnatura</label>
+                    <input type="text" id="adminCaseSygnatura" placeholder="Np. IV GC 316/26">
+                </div>
+                <div class="form-group">
+                    <label for="adminCaseDesc">Opis sprawy</label>
+                    <textarea id="adminCaseDesc" rows="2" placeholder="Krótki opis..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="adminCaseFile">Plik HTML z teczką sprawy</label>
+                    <input type="file" id="adminCaseFile" accept=".html">
+                </div>
+                <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                    <button class="btn-action" id="adminAddCaseBtn" type="button">Opublikuj sprawę</button>
+                </div>
+                <p id="adminCaseFeedback" style="margin-top:10px;font-size:0.9rem;"></p>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom:16px;">Dodaj generator</h3>
+                <div class="form-group">
+                    <label for="adminGenTitle">Nazwa generatora</label>
+                    <input type="text" id="adminGenTitle" placeholder="Np. Generator pism kancelarii XYZ">
+                </div>
+                <div class="form-group">
+                    <label for="adminGenDesc">Opis</label>
+                    <textarea id="adminGenDesc" rows="2" placeholder="Krótki opis..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="adminGenFile">Plik HTML generatora</label>
+                    <input type="file" id="adminGenFile" accept=".html">
+                </div>
+                <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                    <button class="btn-action" id="adminAddGeneratorBtn" type="button">Opublikuj generator</button>
+                </div>
+                <p id="adminGenFeedback" style="margin-top:10px;font-size:0.9rem;"></p>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

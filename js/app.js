@@ -298,6 +298,17 @@
                                         localStorage.setItem('md_verdict_codes', JSON.stringify(codes));
                                     } catch(e) {}
 
+                                    // Backup do localStorage
+                                    try {
+                                        var backup = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
+                                        verdictData.id = result && result.verdict ? result.verdict.id : 'v_backup_' + Date.now();
+                                        verdictData.createdAt = new Date().toISOString();
+                                        verdictData.privateCode = serverCode;
+                                        backup.unshift(verdictData);
+                                        if (backup.length > 50) backup.length = 50;
+                                        localStorage.setItem('md_verdicts', JSON.stringify(backup));
+                                    } catch(e) {}
+
                                     loadVerdicts();
                                 }
 
@@ -766,6 +777,18 @@
                                 showToast('Sprawa "' + title.value.trim() + '" została opublikowana!', 'success', 5000);
                                 // Pokaż i zapisz kod usuwania w przeglądarce
                                 showCommunityDeleteCodeDisplay(serverCode);
+
+                                // Backup do localStorage (na wypadek gdyby GET się nie powiódł)
+                                try {
+                                    var backup = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
+                                    caseData.id = result && result.caseData ? result.caseData.id : 'backup_' + Date.now();
+                                    caseData.createdAt = new Date().toISOString();
+                                    caseData.privateCode = serverCode;
+                                    backup.unshift(caseData);
+                                    // Zachowaj ostatnie 50 dla bezpieczeństwa
+                                    if (backup.length > 50) backup.length = 50;
+                                    localStorage.setItem('md_community_cases', JSON.stringify(backup));
+                                } catch(e) {}
 
                                 // Odśwież listę spraw
                                 loadCommunityCases();
@@ -2385,6 +2408,298 @@
         if (typeof loadVerdicts === 'function') {
             loadVerdicts();
         }
+
+        // ============================================
+        // UKRYTY PANEL ADMINISTRATORA
+        // ============================================
+        // Aktywacja: kliknij logo 5 razy
+        // ============================================
+        (function() {
+            // Lokalny escapeHtml (niezależny od innych scope'ów)
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.appendChild(document.createTextNode(text));
+                return div.innerHTML;
+            }
+            var logoClickCount = 0;
+            var logo = document.querySelector('.nav-logo, .nav-brand');
+            if (logo) {
+                logo.addEventListener('click', function() {
+                    logoClickCount++;
+                    if (logoClickCount >= 5) {
+                        logoClickCount = 0;
+                        var panel = document.getElementById('adminPanel');
+                        if (panel) {
+                            panel.style.display = 'block';
+                            showToast('Panel administratora aktywowany', 'info', 3000);
+                        }
+                    }
+                });
+            }
+
+            // ============================================
+            // KEYBOARD SHORTCUT: Ctrl+Alt+Shift+P — aktywacja panelu admina
+            // ============================================
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.altKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+                    e.preventDefault();
+                    var panel = document.getElementById('adminPanel');
+                    if (panel) {
+                        if (panel.style.display === 'none' || panel.style.display === '') {
+                            panel.style.display = 'block';
+                            showToast('Panel administratora aktywowany', 'info', 3000);
+                        } else {
+                            panel.style.display = 'none';
+                            showToast('Panel administratora zamknięty', 'info', 2000);
+                        }
+                    }
+                }
+            });
+
+            // Admin API helper — wzorowana na GitHubAPI
+            function getAdminUrl() {
+                var host = window.location.hostname;
+                if (host.indexOf('vercel.app') !== -1 || host.indexOf('localhost') !== -1 || host === '127.0.0.1') {
+                    return '/api/admin';
+                }
+                var baseUrl = (typeof FORUM_CONFIG !== 'undefined' && FORUM_CONFIG.vercelApiUrl)
+                    ? FORUM_CONFIG.vercelApiUrl
+                    : '/api/admin';
+                return baseUrl + '/api/admin';
+            }
+
+            // Dodaj sprawę
+            var addCaseBtn = document.getElementById('adminAddCaseBtn');
+            if (addCaseBtn) {
+                addCaseBtn.addEventListener('click', function() {
+                    var title = document.getElementById('adminCaseTitle');
+                    var sygnatura = document.getElementById('adminCaseSygnatura');
+                    var desc = document.getElementById('adminCaseDesc');
+                    var fileInput = document.getElementById('adminCaseFile');
+                    var feedback = document.getElementById('adminCaseFeedback');
+
+                    if (!title || !title.value.trim()) {
+                        if (feedback) feedback.textContent = 'Wpisz tytuł sprawy.';
+                        return;
+                    }
+                    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                        if (feedback) feedback.textContent = 'Wybierz plik HTML.';
+                        return;
+                    }
+
+                    var file = fileInput.files[0];
+                    if (!file.name.toLowerCase().endsWith('.html')) {
+                        if (feedback) feedback.textContent = 'Plik musi być w formacie HTML.';
+                        return;
+                    }
+
+                    if (feedback) feedback.textContent = 'Wysyłanie...';
+                    addCaseBtn.disabled = true;
+
+                    var reader = new FileReader();
+                    reader.onload = function(ev) {
+                        // Zapytaj o hasło admina
+                        var password = prompt('Podaj hasło administratora:');
+                        if (!password) {
+                            if (feedback) feedback.textContent = 'Anulowano.';
+                            addCaseBtn.disabled = false;
+                            return;
+                        }
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', getAdminUrl(), true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.setRequestHeader('Accept', 'application/json');
+
+                        xhr.onload = function() {
+                            addCaseBtn.disabled = false;
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                if (feedback) {
+                                    feedback.textContent = '&#x2714; Sprawa opublikowana! Odśwież stronę, aby zobaczyć.';
+                                    feedback.style.color = 'var(--success)';
+                                }
+                                title.value = '';
+                                if (sygnatura) sygnatura.value = '';
+                                if (desc) desc.value = '';
+                                fileInput.value = '';
+                                showToast('Sprawa dodana! Odśwież stronę.', 'success', 5000);
+                            } else {
+                                var errMsg = 'Błąd (HTTP ' + xhr.status + ')';
+                                try { var d = JSON.parse(xhr.responseText); if (d.error) errMsg = d.error; } catch(e) {}
+                                if (feedback) {
+                                    feedback.textContent = '&#x2716; ' + errMsg;
+                                    feedback.style.color = 'var(--danger)';
+                                }
+                            }
+                        };
+
+                        xhr.onerror = function() {
+                            addCaseBtn.disabled = false;
+                            if (feedback) {
+                                feedback.textContent = '&#x2716; Błąd sieci.';
+                                feedback.style.color = 'var(--danger)';
+                            }
+                        };
+
+                        xhr.send(JSON.stringify({
+                            action: 'addCase',
+                            password: password,
+                            title: title.value.trim(),
+                            sygnatura: sygnatura ? sygnatura.value.trim() : '',
+                            desc: desc ? desc.value.trim() : '',
+                            htmlContent: ev.target.result
+                        }));
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            // Dodaj generator
+            var addGenBtn = document.getElementById('adminAddGeneratorBtn');
+            if (addGenBtn) {
+                addGenBtn.addEventListener('click', function() {
+                    var title = document.getElementById('adminGenTitle');
+                    var desc = document.getElementById('adminGenDesc');
+                    var fileInput = document.getElementById('adminGenFile');
+                    var feedback = document.getElementById('adminGenFeedback');
+
+                    if (!title || !title.value.trim()) {
+                        if (feedback) feedback.textContent = 'Wpisz nazwę generatora.';
+                        return;
+                    }
+                    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                        if (feedback) feedback.textContent = 'Wybierz plik HTML.';
+                        return;
+                    }
+
+                    var file = fileInput.files[0];
+                    if (!file.name.toLowerCase().endsWith('.html')) {
+                        if (feedback) feedback.textContent = 'Plik musi być w formacie HTML.';
+                        return;
+                    }
+
+                    if (feedback) feedback.textContent = 'Wysyłanie...';
+                    addGenBtn.disabled = true;
+
+                    var reader = new FileReader();
+                    reader.onload = function(ev) {
+                        var password = prompt('Podaj hasło administratora:');
+                        if (!password) {
+                            if (feedback) feedback.textContent = 'Anulowano.';
+                            addGenBtn.disabled = false;
+                            return;
+                        }
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', getAdminUrl(), true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.setRequestHeader('Accept', 'application/json');
+
+                        xhr.onload = function() {
+                            addGenBtn.disabled = false;
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                if (feedback) {
+                                    feedback.textContent = '&#x2714; Generator opublikowany! Odśwież stronę.';
+                                    feedback.style.color = 'var(--success)';
+                                }
+                                title.value = '';
+                                if (desc) desc.value = '';
+                                fileInput.value = '';
+                                showToast('Generator dodany! Odśwież stronę.', 'success', 5000);
+                            } else {
+                                var errMsg = 'Błąd (HTTP ' + xhr.status + ')';
+                                try { var d = JSON.parse(xhr.responseText); if (d.error) errMsg = d.error; } catch(e) {}
+                                if (feedback) {
+                                    feedback.textContent = '&#x2716; ' + errMsg;
+                                    feedback.style.color = 'var(--danger)';
+                                }
+                            }
+                        };
+
+                        xhr.onerror = function() {
+                            addGenBtn.disabled = false;
+                            if (feedback) {
+                                feedback.textContent = '&#x2716; Błąd sieci.';
+                                feedback.style.color = 'var(--danger)';
+                            }
+                        };
+
+                        xhr.send(JSON.stringify({
+                            action: 'addGenerator',
+                            password: password,
+                            title: title.value.trim(),
+                            desc: desc ? desc.value.trim() : '',
+                            htmlContent: ev.target.result
+                        }));
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            // Ładowanie dynamicznych treści z manifestu admina
+            function loadAdminContent() {
+                var adminUrl = getAdminUrl();
+                // Dla GET, po prostu fetch
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', adminUrl, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        try {
+                            var manifest = JSON.parse(xhr.responseText);
+                            renderAdminCases(manifest.cases || []);
+                            renderAdminGenerators(manifest.generators || []);
+                        } catch(e) {}
+                    }
+                };
+                xhr.send();
+            }
+
+            function renderAdminCases(cases) {
+                if (!cases || cases.length === 0) return;
+                var grid = document.getElementById('sprawyGrid');
+                if (!grid) return;
+
+                cases.forEach(function(c) {
+                    var card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                    card.innerHTML =
+                        '<h3>' + escapeHtml(c.title) + '</h3>' +
+                        (c.sygnatura ? '<p><strong>Sygnatura:</strong> ' + escapeHtml(c.sygnatura) + '</p>' : '') +
+                        (c.desc ? '<p>' + escapeHtml(c.desc) + '</p>' : '') +
+                        '<a href="' + (c.fileUrl || c.filePath) + '" target="_blank" class="btn-action" style="margin-top:10px;" rel="noopener">Otwórz teczkę</a>';
+                    grid.appendChild(card);
+                });
+            }
+
+            function renderAdminGenerators(generators) {
+                if (!generators || generators.length === 0) return;
+                var tab = document.getElementById('tab-generatory');
+                if (!tab) return;
+                var grid = tab.querySelector('.cards-grid');
+                if (!grid) return;
+
+                generators.forEach(function(g) {
+                    var card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                    card.innerHTML =
+                        '<h3>' + escapeHtml(g.title) + '</h3>' +
+                        (g.desc ? '<p>' + escapeHtml(g.desc) + '</p>' : '') +
+                        '<a href="' + (g.fileUrl || g.filePath) + '" target="_blank" class="btn-action" download rel="noopener">Pobierz HTML</a>';
+                    grid.appendChild(card);
+                });
+            }
+
+            // Załaduj zawartość admina po załadowaniu strony
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                loadAdminContent();
+            } else {
+                document.addEventListener('DOMContentLoaded', loadAdminContent);
+            }
+        })();
 
         // Load community cases on page load
         if (typeof loadCommunityCases === 'function') {
