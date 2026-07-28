@@ -896,7 +896,7 @@
                         '<p style="font-size:0.95rem;color:var(--text-muted);">Sprawa przesłana w starszym formacie &mdash; brak pełnych danych.</p>' +
                         '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + legacyDateStr + ' &bull; ' + escapeHtml(c.name || '') + ' (' + formatSize(c.size) + ')</p>' +
                         '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
-                            '<a href="' + c.data + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
+                            '<a href="' + (c.fileUrl || c.data || '#') + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
                                 '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> Otwórz</a>' +
                         '</div>';
                 } else {
@@ -917,7 +917,7 @@
                         '<p style="margin-top:8px;">' + escapeHtml(c.desc) + '</p>' +
                         '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + dateStr + ' &bull; ' + (c.fileName ? escapeHtml(c.fileName) : '') + ' (' + formatSize(c.size) + ')</p>' +
                         '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
-                            '<a href="' + c.data + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
+                            '<a href="' + (c.fileUrl || c.data || '#') + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
                                 '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> Otwórz teczkę</a>' +
                             '<button class="case-edit-btn" data-idx="' + getGlobalCaseIndex(c) + '" data-format="' + (c.format || 'html') + '" title="Edytuj sprawę" style="background:none;border:1px solid var(--border);color:var(--accent);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x270E; Edytuj</button>' +
                             '<button class="case-del-btn" data-idx="' + getGlobalCaseIndex(c) + '" title="Usuń sprawę" style="background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x2716; Usuń</button>' +
@@ -2233,7 +2233,7 @@
             verdicts.forEach(function(v, idx) {
                 var date = new Date(v.createdAt || Date.now());
                 var dateStr = date.toLocaleDateString('pl-PL');
-                var fileUrl = v.data || '#';
+                var fileUrl = v.fileUrl || v.data || '#';
                 var btnText = v.fileName ? 'Otwórz plik (' + escapeHtml(v.fileName) + ')' : 'Zobacz orzeczenie';
 
                 var card = document.createElement('div');
