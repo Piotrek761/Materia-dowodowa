@@ -17,5 +17,8 @@ var FORUM_CONFIG = {
     filePath: 'forum/topics.json',
 
     // Gałąź
-    branch: 'main'
-};
+    branch: 'main',
+
+    // Adres API Vercel — dla GitHub Pages (gdy strona nie jest na Vercel)
+    // Ustaw na: 'https://materia-dowodowa.vercel.app'
+    vercelApiUrl: 'https://materia-dowodowa.vercel.app'
