@@ -5,8 +5,9 @@
             // TAB SWITCHING
             // ============================================
             function switchTab(tabId) {
-                // Wyczyść flagę edycji przy każdej zmianie zakładki
+                // Wyczyść flagi edycji przy każdej zmianie zakładki
                 window._editingCase = null;
+                window._editingVerdict = null;
 
                 // Update content panels
                 document.querySelectorAll('.tab-content').forEach(function (el) {
@@ -223,6 +224,7 @@
                         });
 
                     // Validate
+                    var isEditing = !!window._editingVerdict;
                     var hasError = false;
                     var fields = [
                         { el: title, feedback: document.getElementById('vTitle-feedback'), name: 'Tytuł' },
@@ -232,6 +234,11 @@
                     ];
 
                     fields.forEach(function (field) {
+                        // Podczas edycji plik PDF jest opcjonalny
+                        if (field.el.type === 'file' && isEditing) {
+                            // Plik opcjonalny podczas edycji
+                            return;
+                        }
                         if (!field.el.value || (field.el.type === 'file' && field.el.files.length === 0)) {
                             field.el.classList.add('error');
                             if (field.feedback) {
@@ -279,6 +286,55 @@
                         };
 
                         // Wyślij przez API
+                        // Sprawdź czy to edycja istniejącego orzeczenia
+                        if (window._editingVerdict) {
+                            var ev = window._editingVerdict;
+                            window._editingVerdict = null;
+
+                            if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postVerdictAction) {
+                                var editPayload = {
+                                    idx: ev.idx,
+                                    code: ev.code,
+                                    title: verdictData.title,
+                                    court: verdictData.court,
+                                    desc: verdictData.desc,
+                                    presiding: verdictData.presiding,
+                                    judge: verdictData.judge,
+                                    member: verdictData.member
+                                };
+                                // Jeśli wybrano nowy plik — dołącz go do payloadu
+                                if (verdictData.data && verdictData.data.length > 10) {
+                                    editPayload.data = verdictData.data;
+                                    editPayload.fileName = verdictData.fileName;
+                                    editPayload.size = verdictData.size;
+                                }
+                                GitHubAPI.postVerdictAction('edit', editPayload, function(err) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.classList.remove('loading');
+                                    if (err) {
+                                        showToast('Błąd aktualizacji: ' + err, 'error', 5000);
+                                    } else {
+                                        showToast('Orzeczenie zaktualizowane!', 'success', 4000);
+                                    }
+                                    loadVerdicts();
+                                });
+                            } else {
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('loading');
+                                showToast('API niedostępne — edycja tylko lokalnie.', 'info', 4000);
+                            }
+
+                            verdictForm.reset();
+                            document.querySelectorAll('.field-feedback').forEach(function (el) {
+                                el.textContent = ''; el.className = 'field-feedback';
+                            });
+                            document.querySelectorAll('input.success, textarea.success').forEach(function (el) {
+                                el.classList.remove('success');
+                            });
+                            switchTab('orzecznictwo');
+                            return;
+                        }
+
                         if (typeof GitHubAPI !== 'undefined' && GitHubAPI.postVerdictAction) {
                             GitHubAPI.postVerdictAction('create', verdictData, function(err, result) {
                                 submitBtn.disabled = false;
@@ -979,22 +1035,40 @@
                 htmlCases.forEach(function (c, i) { renderCaseCard(c, i, htmlGrid); });
             }
 
-            // Dodaj handler usuwania z kodem
-            document.querySelectorAll('.case-del-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var idx = parseInt(this.getAttribute('data-idx'));
-                    showCommunityDeleteModal(idx);
-                });
-            });
-
-            // Dodaj handler edycji z kodem
-            document.querySelectorAll('.case-edit-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var idx = parseInt(this.getAttribute('data-idx'));
-                    showCommunityEditModal(idx);
-                });
-            });
+            // Delegacja zdarzeń — usuwamy bezpośrednie listenery które się kumulują
+            // (zdarzenia będą obsługiwane przez globalną delegację w dokumencie)
+            // KONIEC renderCommunityCases
         }
+
+        // Globalna delegacja zdarzeń dla przycisków w sprawach i orzeczeniach
+        // Zapobiega kumulowaniu się listenerów przy każdym renderowaniu
+        document.addEventListener('click', function(e) {
+            var target = e.target;
+            // Przycisk usuwania sprawy
+            if (target.classList.contains('case-del-btn')) {
+                var idx = parseInt(target.getAttribute('data-idx'));
+                showCommunityDeleteModal(idx);
+                return;
+            }
+            // Przycisk edycji sprawy
+            if (target.classList.contains('case-edit-btn')) {
+                var idx = parseInt(target.getAttribute('data-idx'));
+                showCommunityEditModal(idx);
+                return;
+            }
+            // Przycisk usuwania orzeczenia
+            if (target.classList.contains('verdict-del-btn')) {
+                var idx = parseInt(target.getAttribute('data-idx'));
+                showVerdictDeleteModal(idx);
+                return;
+            }
+            // Przycisk edycji orzeczenia
+            if (target.classList.contains('verdict-edit-btn')) {
+                var idx = parseInt(target.getAttribute('data-idx'));
+                showVerdictEditModal(idx);
+                return;
+            }
+        });
 
         // ============================================
         // COMMUNITY CASES — delete/edit with code
@@ -2277,7 +2351,6 @@
                 return;
             }
 
-            // Sprawdź czy escapeHtml jest dostępne
             if (typeof escapeHtml !== 'function') {
                 console.error('[DEBUG] CRITICAL: escapeHtml is not defined!');
                 if (typeof showToast === 'function') {
@@ -2294,15 +2367,22 @@
                 return;
             }
 
+            // Stwórz grid dla kart
+            var grid = document.createElement('div');
+            grid.className = 'cards-grid';
+
             verdicts.forEach(function(v, idx) {
                 var date = new Date(v.createdAt || Date.now());
                 var dateStr = date.toLocaleDateString('pl-PL');
                 var fileUrl = v.fileUrl || v.data || '#';
-                var btnText = v.fileName ? 'Otwórz plik (' + escapeHtml(v.fileName) + ')' : 'Zobacz orzeczenie';
 
                 var card = document.createElement('div');
                 card.className = 'card';
                 card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+
+                var descPreview = v.desc && v.desc.length > 150
+                    ? escapeHtml(v.desc.substring(0, 150)) + '...'
+                    : (v.desc ? escapeHtml(v.desc) : '');
 
                 var panelHtml = '';
                 if (v.presiding) panelHtml += '<p><strong>Przewodniczący:</strong> ' + escapeHtml(v.presiding) + '</p>';
@@ -2311,27 +2391,22 @@
 
                 card.innerHTML =
                     '<h3>' + escapeHtml(v.title) + '</h3>' +
-                    '<p><strong>Organ orzekający:</strong> ' + escapeHtml(v.court) + '</p>' +
+                    '<p style="margin-bottom:4px;"><strong>Organ orzekający:</strong> ' + escapeHtml(v.court) + '</p>' +
                     panelHtml +
-                    '<p>' + escapeHtml(v.desc) + '</p>' +
-                    '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:12px;">Dodano: ' + dateStr + '</p>' +
+                    (descPreview ? '<p style="margin-top:8px;font-size:0.95rem;">' + descPreview + '</p>' : '') +
+                    '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;padding-top:10px;">Dodano: ' + dateStr + (v.fileName ? ' &bull; ' + escapeHtml(v.fileName) : '') + '</p>' +
                     '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">' +
                         '<a href="' + fileUrl + '" target="_blank" class="btn-action" style="font-size:0.85rem;" rel="noopener">' +
-                            '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> ' + btnText + '</a>' +
+                            '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v10"/><path d="M7 7l3-4 3 4"/><path d="M2 15v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg> Otwórz PDF</a>' +
+                        '<button class="verdict-edit-btn" data-idx="' + idx + '" title="Edytuj orzeczenie" style="background:none;border:1px solid var(--border);color:var(--accent);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x270E; Edytuj</button>' +
                         '<button class="verdict-del-btn" data-idx="' + idx + '" title="Usuń orzeczenie" style="background:none;border:1px solid var(--danger);color:var(--danger);cursor:pointer;padding:4px 12px;font-size:0.85rem;border-radius:6px;transition:var(--t-fast);">&#x2716; Usuń</button>' +
                     '</div>';
 
-                container.appendChild(card);
+                grid.appendChild(card);
             });
 
-            // Delete handlers
-            container.querySelectorAll('.verdict-del-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var idx = parseInt(this.getAttribute('data-idx'));
-                    showVerdictDeleteModal(idx);
-                });
-            });
-            console.log('[DEBUG] renderVerdicts: done, ' + container.querySelectorAll('.card').length + ' cards rendered');
+            container.appendChild(grid);
+            console.log('[DEBUG] renderVerdicts: done, ' + grid.querySelectorAll('.card').length + ' cards rendered');
         }
 
         function showVerdictDeleteCodeDisplay(code) {
@@ -2365,6 +2440,92 @@
                 var codes = JSON.parse(localStorage.getItem('md_verdict_codes') || '{}');
                 return codes['last'] || null;
             } catch(e) { return null; }
+        }
+
+        // ============================================
+        // VERDICTS — edit with code
+        // ============================================
+        function showVerdictEditModal(idx) {
+            var allVerdicts = window._verdicts || [];
+            var v = allVerdicts[idx];
+            if (!v) {
+                showToast('Nie znaleziono orzeczenia.', 'error', 3000);
+                return;
+            }
+
+            var modal = document.getElementById('deleteCodeModal');
+            var input = document.getElementById('deleteCodeInput');
+            var feedback = document.getElementById('deleteCodeFeedback');
+            var confirmBtn = document.getElementById('deleteCodeConfirmBtn');
+            var cancelBtn = document.getElementById('deleteCodeCancelBtn');
+            var mTitle = document.getElementById('deleteModalTitle');
+            var mDesc = document.getElementById('deleteModalDesc');
+
+            if (!modal || !input) return;
+
+            mTitle.textContent = 'Edytuj orzeczenie';
+            mDesc.textContent = 'Aby edytować to orzeczenie, wpisz kod otrzymany przy publikacji. Po weryfikacji zostaniesz przeniesiony do formularza.';
+
+            var savedCode = getVerdictCode(idx);
+            input.value = savedCode || '';
+            feedback.textContent = savedCode ? 'Kod automatycznie wczytany' : '';
+            feedback.className = savedCode ? 'field-feedback success' : 'field-feedback';
+            modal.style.display = 'flex';
+
+            function cleanup() {
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            }
+
+            function handleConfirm() {
+                var code = input.value.trim().toUpperCase();
+                if (!code) {
+                    feedback.textContent = 'Wpisz kod edycji.';
+                    feedback.className = 'field-feedback error';
+                    return;
+                }
+
+                cleanup();
+
+                // Ustaw flagę edycji
+                window._editingVerdict = { idx: idx, code: code };
+
+                // Wypełnij formularz danymi orzeczenia
+                var titleField = document.getElementById('vTitle');
+                var courtField = document.getElementById('vCourt');
+                var descField = document.getElementById('vDesc');
+                var presidingField = document.getElementById('vPresiding');
+                var judgeField = document.getElementById('vJudge');
+                var memberField = document.getElementById('vMember');
+
+                if (titleField) titleField.value = v.title || '';
+                if (courtField) courtField.value = v.court || '';
+                if (descField) descField.value = v.desc || '';
+                if (presidingField) presidingField.value = v.presiding || '';
+                if (judgeField) judgeField.value = v.judge || '';
+                if (memberField) memberField.value = v.member || '';
+
+                // Przełącz na zakładkę wysyłania
+                switchTab('wyslij');
+                // Przewiń do formularza
+                var form = document.getElementById('verdictForm');
+                if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                showToast('Dane orzeczenia wczytane. Zmodyfikuj i wyślij formularz, aby zaktualizować.', 'info', 5000);
+            }
+
+            function handleCancel() {
+                window._editingVerdict = null;
+                cleanup();
+            }
+
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+            input.addEventListener('keydown', function onEnter(e) {
+                if (e.key === 'Enter') { e.preventDefault(); handleConfirm(); }
+            });
+            setTimeout(function() { input.focus(); }, 100);
         }
 
         function showVerdictDeleteModal(idx) {
@@ -2478,3 +2639,18 @@
         } else {
             console.warn('[DEBUG] loadCommunityCases is not a function!');
         }
+
+        // ============================================
+        // Keyboard shortcut: Ctrl+Alt+Shift+P -> Admin Panel
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.altKey && e.shiftKey && e.code === 'KeyP') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.toggleAdminPanel === 'function') {
+                    window.toggleAdminPanel();
+                } else {
+                    console.warn('Admin panel not loaded (toggleAdminPanel not found)');
+                }
+            }
+        });

@@ -1,15 +1,1 @@
-{
-  "cases": [
-    {
-      "id": "sprawa-ms4z0fy5-QTGL",
-      "title": "Spraw Nowa",
-      "sygnatura": "GC 222",
-      "desc": "OPIs",
-      "fileName": "sprawa-ms4z0fy5-QTGL.html",
-      "filePath": "sprawy/sprawa-ms4z0fy5-QTGL.html",
-      "fileUrl": "https://raw.githubusercontent.com/Piotrek761/Materia-dowodowa/main/sprawy/sprawa-ms4z0fy5-QTGL.html",
-      "createdAt": "2026-07-28T18:09:48.457Z"
-    }
-  ],
-  "generators": []
-}
+{"cases":[],"generators":[]}

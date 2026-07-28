@@ -85,6 +85,8 @@ async function handlePost(req, res, headers, repo) {
             return await handleCreate(req, res, headers, repo, verdicts, sha, manifestUrl);
         case 'delete':
             return await handleDelete(req, res, headers, repo, verdicts, sha, manifestUrl);
+        case 'edit':
+            return await handleEdit(req, res, headers, repo, verdicts, sha, manifestUrl);
         default:
             return res.status(400).json({ error: 'Nieznana akcja: ' + action });
     }
@@ -247,6 +249,97 @@ async function handleDelete(req, res, headers, repo, verdicts, sha, manifestUrl)
     }
 
     return res.status(200).json({ success: true });
+}
+
+// ============================================
+// EDIT — edytuj orzeczenie (wymaga kodu)
+// ============================================
+async function handleEdit(req, res, headers, repo, verdicts, sha, manifestUrl) {
+    const { idx, code, title, court, desc, presiding, judge, member, fileName, data, size } = req.body || {};
+
+    if (idx === undefined || idx === null) {
+        return res.status(400).json({ error: 'Brak idx' });
+    }
+
+    const i = parseInt(idx);
+    if (i < 0 || i >= verdicts.length) {
+        return res.status(404).json({ error: 'Nie znaleziono orzeczenia' });
+    }
+
+    const v = verdicts[i];
+
+    if (v.privateCode && code !== v.privateCode) {
+        return res.status(403).json({ error: 'Nieprawidłowy kod edycji' });
+    }
+
+    // ============================================
+    // 1. Jeśli przesłano nowy plik — zastąp istniejący w repo
+    // ============================================
+    let rawFileUrl = v.fileUrl || '';
+
+    if (data && data.length > 10 && v.id) {
+        const ext = 'pdf';
+        const repoFilePath = `orzeczenia/files/${v.id}.${ext}`;
+        const fileUrl = `${GITHUB_API}/repos/${repo}/contents/${repoFilePath}`;
+
+        const base64Match = data.match(/^data:[^;]+;base64,(.+)$/);
+        const fileContent = base64Match ? base64Match[1] : Buffer.from(data).toString('base64');
+
+        // Najpierw pobierz obecny plik (żeby dostać SHA do nadpisania)
+        let fileSha = null;
+        try {
+            const getResp = await fetch(fileUrl, { headers });
+            if (getResp.ok) {
+                const fileData = await getResp.json();
+                fileSha = fileData.sha;
+            }
+        } catch(e) {}
+
+        const fileBody = {
+            message: `Zaktualizowano plik orzeczenia: ${title ? title.trim() : v.title} (${new Date().toLocaleString('pl-PL')})`,
+            content: fileContent,
+            branch: 'main'
+        };
+        if (fileSha) fileBody.sha = fileSha;
+
+        try {
+            const fileResp = await fetch(fileUrl, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify(fileBody)
+            });
+            if (fileResp.ok) {
+                rawFileUrl = `${GITHUB_RAW}/${repo}/main/${repoFilePath}`;
+            } else {
+                const errData = await fileResp.json().catch(() => ({}));
+                console.error('Błąd zapisu pliku przy edycji:', errData.message || fileResp.status);
+            }
+        } catch (err) {
+            console.error('Błąd sieci przy zapisie pliku:', err.message);
+        }
+    }
+
+    // ============================================
+    // 2. Zaktualizuj metadane w manifest
+    // ============================================
+    if (title) v.title = title.trim();
+    if (court) v.court = court.trim();
+    if (desc) v.desc = desc.trim();
+    if (presiding !== undefined) v.presiding = presiding;
+    if (judge !== undefined) v.judge = judge;
+    if (member !== undefined) v.member = member;
+    if (fileName) v.fileName = fileName;
+    if (size) v.size = size;
+    v.fileUrl = rawFileUrl;
+    v.modifiedAt = new Date().toISOString();
+
+    const commitResult = await commitFile(headers, manifestUrl, verdicts, sha, 'Edytowano orzeczenie: ' + (v.title || 'bez nazwy'));
+
+    if (!commitResult.success) {
+        return res.status(500).json({ error: commitResult.error || 'Błąd zapisu manifestu' });
+    }
+
+    return res.status(200).json({ success: true, verdict: v });
 }
 
 async function commitFile(headers, fileUrl, data, sha, message) {
