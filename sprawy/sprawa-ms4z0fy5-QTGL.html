@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akta Sprawy V GC 412/26 – Pełny Archiwalny Kompleks Dowodowy 1:1</title>
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --paper-color: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+            --stamp-red: #b91c1c;
+            --stamp-blue: #1d4ed8;
+            --stamp-purple: #6b21a8;
+            --krs-blue: #0284c7;
+            --court-gold: #b45309;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #1e293b;
+            color: #ffffff;
+            padding: 14px 24px;
+            position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-size: 1.2rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
+
+        .print-btn {
+            background-color: #15803d; color: white; border: none;
+            padding: 8px 18px; font-size: 0.85rem; font-weight: 600;
+            border-radius: 5px; cursor: pointer; transition: background 0.2s;
+        }
+        .print-btn:hover { background-color: #166534; }
+
+        .folder-group { display: flex; gap: 10px; align-items: center; }
+        .folder-label { font-size: 0.8rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; min-width: 130px; letter-spacing: 0.5px; }
+
+        .nav-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+        .tab-btn {
+            background-color: #334155; color: #cbd5e1; border: 1px solid #475569;
+            padding: 6px 12px; cursor: pointer; border-radius: 4px;
+            font-size: 0.78rem; white-space: nowrap; font-family: 'Segoe UI', sans-serif; transition: all 0.15s;
+        }
+        .tab-btn:hover { background-color: #475569; color: #ffffff; }
+        .tab-btn.active { background-color: #2563eb; color: #ffffff; border-color: #60a5fa; font-weight: 700; box-shadow: 0 0 8px rgba(37,99,235,0.5); }
+
+        main { max-width: 960px; margin: 30px auto; padding: 0 12px; }
+
+        .doc-page {
+            display: none; background-color: var(--paper-color);
+            padding: 70px 90px; box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color); min-height: 1150px;
+            position: relative; margin-bottom: 40px; font-size: 10.5pt;
+        }
+        .doc-page.active { display: block; }
+
+        h1, h2, h3, h4 { text-align: center; font-weight: bold; margin-top: 18px; margin-bottom: 14px; text-transform: uppercase; color: #0f172a; }
+        h1 { font-size: 1.4rem; letter-spacing: 1px; } 
+        h2 { font-size: 1.2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; } 
+        h3 { font-size: 1.05rem; } 
+        h4 { font-size: 0.95rem; }
+
+        p { text-align: justify; text-indent: 28px; margin-bottom: 12px; }
+        p.no-indent { text-indent: 0; }
+
+        .header-left { float: left; width: 52%; font-size: 0.9rem; line-height: 1.4; }
+        .header-right { float: right; width: 44%; text-align: right; font-size: 0.9rem; line-height: 1.4; }
+
+        .meta-box {
+            background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6;
+            padding: 12px 16px; margin: 18px 0; font-family: 'Segoe UI', sans-serif; font-size: 0.85rem;
+        }
+
+        .data-table {
+            width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.85rem; font-family: Arial, sans-serif;
+        }
+        .data-table th, .data-table td { border: 1px solid #334155; padding: 7px 10px; text-align: left; vertical-align: middle; }
+        .data-table th { background-color: #f1f5f9; text-align: center; font-weight: bold; color: #0f172a; }
+        .text-right { text-align: right !important; }
+        .text-center { text-align: center !important; }
+
+        .notary-header { text-align: center; font-size: 1.2rem; font-weight: bold; letter-spacing: 1.5px; border-bottom: 2px double #000; padding-bottom: 10px; margin-bottom: 25px; }
+        .notary-clause { font-style: italic; background-color: #f8fafc; border-left: 3px solid #64748b; padding: 14px; margin: 22px 0; font-size: 0.88rem; }
+
+        .krs-wrapper { border: 2px solid var(--krs-blue); padding: 20px; font-family: Arial, sans-serif; background-color: #fafafa; }
+        .krs-header { border-bottom: 2px solid var(--krs-blue); padding-bottom: 12px; text-align: center; margin-bottom: 18px; }
+        .krs-section-title { background-color: var(--krs-blue); color: white; padding: 6px 12px; font-weight: bold; font-size: 0.88rem; margin-top: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .krs-subrow { border-bottom: 1px dashed #cbd5e1; padding: 6px 0; font-size: 0.82rem; }
+
+        .seal-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 30px 0; }
+        
+        .stamp { display: inline-block; padding: 8px 14px; font-family: Arial, sans-serif; font-size: 0.72rem; font-weight: bold; text-transform: uppercase; text-align: center; line-height: 1.3; }
+        .stamp-incoming { border: 2px double var(--stamp-red); color: var(--stamp-red); transform: rotate(-1.5deg); background: rgba(254, 242, 242, 0.4); }
+        .stamp-lawfirm { border: 2px solid var(--stamp-blue); color: var(--stamp-blue); transform: rotate(1deg); }
+
+        .signature-block { margin-top: 45px; float: right; text-align: center; width: 280px; font-size: 0.88rem; }
+        .signature-line { border-bottom: 1px dotted #000; margin-top: 45px; margin-bottom: 5px; }
+
+        .clearfix::after { content: ""; clear: both; display: table; }
+
+        @media print {
+            header { display: none !important; }
+            body { background-color: #fff !important; }
+            main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .doc-page { display: block !important; box-shadow: none !important; border: none !important; padding: 15mm !important; page-break-after: always !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="header-title">🏛️ SPRAWA V GC 412/26 – ARCHIWALNE AKTA PROCESOWE I DOWODOWE</div>
+            <button class="print-btn" onclick="window.print()">🖨️ Drukuj Całą Teczkę Akta</button>
+        </div>
+        
+        <!-- TECZKA A -->
+        <div class="folder-group">
+            <span class="folder-label">Teczka A (Powód):</span>
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="showDoc('docA1', this)">A1. Postanowienie Spadkowe (1999)</button>
+                <button class="tab-btn" onclick="showDoc('docA2', this)">A2. Akt Założycielski + Pieczęć Notariusza (1992)</button>
+                <button class="tab-btn" onclick="showDoc('docA3', this)">A3. Odpis KRS z Sądu w Gryfowie Wlkp.</button>
+                <button class="tab-btn" onclick="showDoc('docA4', this)">A4. Faktura VAT (Peter of Bank S.A.)</button>
+                <button class="tab-btn" onclick="showDoc('docA5', this)">A5. Przedsądowe Wezwanie do Zapłaty</button>
+                <button class="tab-btn" onclick="showDoc('docA6', this)">A6. Pełny Pozew o Ustalenie (Art. 189 KPC)</button>
+                <button class="tab-btn" onclick="showDoc('docA7', this)">A7. Zawiadomienie o Otwarciu Spadku (1999)</button>
+                <button class="tab-btn" onclick="showDoc('docA8', this)">A8. Analityka Księgowa (Konto 801/234)</button>
+            </div>
+        </div>
+
+        <!-- TECZKA B -->
+        <div class="folder-group">
+            <span class="folder-label">Teczka B (Pozwany):</span>
+            <div class="nav-tabs">
+                <button class="tab-btn" onclick="showDoc('docB1', this)">B1. Protokół ZZW + Uchwała Dywidendowa (2025)</button>
+                <button class="tab-btn" onclick="showDoc('docB2', this)">B2. Wyciąg z Księgi Udziałów</button>
+                <button class="tab-btn" onclick="showDoc('docB3', this)">B3. Odpowiedź na Wezwanie Przedsądowe</button>
+                <button class="tab-btn" onclick="showDoc('docB4', this)">B4. Odpowiedź na Pozew</button>
+                <button class="tab-btn" onclick="showDoc('docB5', this)">B5. Bilans i Rachunek Zysków i Strat (2025)</button>
+            </div>
+        </div>
+
+        <!-- TECZKA C -->
+        <div class="folder-group">
+            <span class="folder-label">Teczka C (Sądowa):</span>
+            <div class="nav-tabs">
+                <button class="tab-btn" onclick="showDoc('docC1', this)">C1. Zarządzenie Przewodniczącego</button>
+                <button class="tab-btn" onclick="showDoc('docC2', this)">C2. Postanowienie o Zabezpieczeniu Powództwa</button>
+                <button class="tab-btn" onclick="showDoc('docC3', this)">C3. Załączone Akta Spadkowe (I Ns 114/99)</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- DOKUMENT A1: POSTANOWIENIE SPADKOWE (1999) -->
+        <div id="docA1" class="doc-page active">
+            <div class="header-left">
+                <strong>SĄD REJONOWY W GRYFOWIE WIELKOPOLSKIM</strong><br>
+                I Wydział Cywilny<br>
+                ul. Sądowa 2, 64-300 Gryfów Wielkopolski
+            </div>
+            <div class="header-right">
+                Sygnatura akt: <strong>I Ns 114/99</strong><br>
+                Gryfów Wlkp., dnia 14 lutego 1999 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <h1>POSTANOWIENIE</h1>
+            <p class="no-indent" style="text-align: center; font-weight: bold;">W IMIENIU RZECZYPOSPOLITEJ POLSKIEJ</p>
+            <br>
+            <p class="no-indent">Sąd Rejonowy w Gryfowie Wielkopolskim I Wydział Cywilny w składzie:</p>
+            <p class="no-indent" style="margin-left: 30px;"><strong>Przewodniczący:</strong> Sędzia SR Helena Wisłocka</p>
+            <p class="no-indent" style="margin-left: 30px;"><strong>Protokolant:</strong> starszy sekretarz sądowy Maria Urban</p>
+            <br>
+            <p class="no-indent">po rozpoznaniu w dniu 14 lutego 1999 r. w Gryfowie Wielkopolskim na rozprawie sprawy z wniosku Danuty Nieznanowskiej z udziałem Tomasza Nieznanowskiego o stwierdzenie nabycia spadku po Adamie Nieznanowskim, zmarłym w dniu 10 listopada 1998 r. w Gryfowie Wielkopolskim, ostatnio stale zamieszkałym przy ul. Kościuszki 14 w Gryfowie Wlkp.,</p>
+
+            <h3>POSTANAWIA:</h3>
+            <p class="no-indent"><strong>1.</strong> Stwierdzić, że spadek po <strong>Adamie Nieznanowskim</strong>, synu Mariana i Zofii, zmarłym dnia 10 listopada 1998 r. w Gryfowie Wielkopolskim, na podstawie ustawy z dobrodziejstwem inwentarza nabyli:</p>
+            <ol style="margin-left: 40px; line-height: 2;">
+                <li>żona <strong>Danuta Nieznanowska z domu Nowak</strong>, córka Józefa i Anny – w <strong>1/2 (jednej drugiej) części</strong>,</li>
+                <li>syn <strong>Tomasz Nieznanowski</strong>, syn Adama i Danuty – w <strong>1/2 (jednej drugiej) części</strong>.</li>
+            </ol>
+            <p class="no-indent"><strong>2.</strong> Ustalić, że koszty postępowania wnioskodawczyni i uczestnik ponoszą we własnym zakresie.</p>
+
+            <br>
+            <h3>UZASADNIENIE (SKRÓCONE)</h3>
+            <p>Spadkodawca Adam Nieznanowski zmarł dnia 10 listopada 1998 r. W chwili śmierci pozostawał w związku małżeńskim z Danutą Nieznanowską, z którego to związku pochodzi jedyny syn Tomasz Nieznanowski. Spadkodawca nie pozostawił testamentu. Zgłoszone w toku postępowania zapewnienie spadkowe potwierdziło brak innych spadkobierców ustawowych oraz brak odrzuceń spadku. Zgodnie z art. 931 § 1 Kodeksu cywilnego małżonek i dziecko spadkodawcy dziedziczą spadek w częściach równych.</p>
+
+            <div class="seal-container">
+                <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="sr-upper1" d="M 26,80 A 54,54 0 0,1 134,80" fill="none" />
+                        <path id="sr-lower1" d="M 26,80 A 54,54 0 0,0 134,80" fill="none" />
+                    </defs>
+                    <circle cx="80" cy="80" r="74" fill="none" stroke="#b91c1c" stroke-width="3" />
+                    <circle cx="80" cy="80" r="67" fill="none" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3,2" />
+                    <circle cx="80" cy="80" r="44" fill="none" stroke="#b91c1c" stroke-width="1.5" />
+                    <g fill="#b91c1c" font-family="Arial, sans-serif" font-size="8.5pt" font-weight="bold" letter-spacing="1px">
+                        <text text-anchor="middle"><textPath href="#sr-upper1" startOffset="50%">SĄD REJONOWY</textPath></text>
+                        <text text-anchor="middle" dy="11"><textPath href="#sr-lower1" startOffset="50%">W GRYFOWIE WLKP.</textPath></text>
+                    </g>
+                    <g transform="translate(80, 82) scale(0.9)" stroke="#b91c1c" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                        <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                        <circle cx="0" cy="-23" r="2" fill="#b91c1c" />
+                        <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                        <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                        <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                        <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#b91c1c" stroke-width="1" />
+                        <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                        <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                        <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#b91c1c" stroke-width="1" />
+                    </g>
+                </svg>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Przewodnicząca Sędzia SR Helena Wisłocka
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A2: PEŁNY AKT ZAŁOŻYCIELSKI Z POPRAWIONĄ PIECZĘCIĄ NOTARIUSZA -->
+        <div id="docA2" class="doc-page">
+            <div class="notary-header">
+                REPERTORIUM A Nr 9811/1992<br>
+                AKT NOTARIALNY
+            </div>
+
+            <p class="no-indent">Dnia dwunastego listopada tysiąc dziewięćset dziewięćdziesiątego drugiego roku (12.11.1992 r.) przed Krystyną Starowieyską, Notariuszem w Państwowym Biurze Notarialnym w Gryfowie Wielkopolskim, w kancelarii przy ul. Rynkowej 5, stawili się:</p>
+            
+            <p class="no-indent">1. <strong>Jan Nowakowski</strong>, zamieszkały w Gryfowie Wielkopolskim przy ul. Poznańskiej 12, legitymujący się dowodem osobistym serii AB nr 492019,</p>
+            <p class="no-indent">2. <strong>Adam Nieznanowski</strong>, zamieszkały w Gryfowie Wielkopolskim przy ul. Kościuszki 14, legitymujący się dowodem osobistym serii CD nr 119204,</p>
+            <p class="no-indent">3. <strong>Marek Nieznanowski</strong> (brat Adama), zamieszkały w Gryfowie Wielkopolskim przy ul. Ogrodowej 8, legitymujący się dowodem osobistym serii CD nr 882910.</p>
+
+            <p class="no-indent">Tożsamość stawających Notariusz ustaliła na podstawie okazanych wyżej dowodów osobistych.</p>
+            <p class="no-indent">Stawający oświadczają, że zawiązują Spółkę z ograniczoną odpowiedzialnością o następującej treści aktu:</p>
+
+            <h3>UMOWA SPÓŁKI Z O.O.</h3>
+
+            <p><strong>§ 1. [Firma i Siedziba]</strong><br>
+            Spółka działa pod firmą: <strong>Przedsiębiorstwo Handlowo-Usługowe „NOWAKOWSKI-NIEZNANOWSKI” Spółka z ograniczoną odpowiedzialnością</strong>. Spółka może używać skrótu PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. Siedzibą Spółki jest Gryfów Wielkopolski.</p>
+
+            <p><strong>§ 2. [Przedmiot Działalności]</strong><br>
+            Przedmiotem działalności Spółki jest prowadzenie hurtowej i detalicznej sprzedaży artykułów przemysłowych, hurtowy obrót paliwami oraz świadczenie usług magazynowych i logistycznych.</p>
+
+            <p><strong>§ 4. [Kapitał Zakładowy i Struktura Udziałów]</strong><br>
+            1. Kapitał zakładowy Spółki wynosi <strong>5.000.000.000 PLZ</strong> (słownie: pięć miliardów starych złotych polskich) [co po denominacji z 1995 r. stanowi kwotę 500.000,00 PLN].<br>
+            2. Kapitał zakładowy dzieli się na 1.000 (jeden tysiąc) równych i niepodzielnych udziałów o wartości nominalnej 5.000.000 PLZ [500,00 PLN po denominacji] każdy.<br>
+            3. Wspólnicy obejmują udziały w kapitałach w następujących proporcjach:<br>
+            – <strong>Jan Nowakowski</strong> obejmuje <strong>400 (czterysta) udziałów</strong> o łącznej wartości nominalnej 2.000.000.000 PLZ [200.000 PLN], reprezentujących <strong>40% kapitału</strong>,<br>
+            – <strong>Adam Nieznanowski</strong> obejmuje <strong>300 (trzysta) udziałów</strong> o łącznej wartości nominalnej 1.500.000.000 PLZ [150.000 PLN], reprezentujących <strong>30% kapitału</strong>,<br>
+            – <strong>Marek Nieznanowski</strong> obejmuje <strong>300 (trzysta) udziałów</strong> o łącznej wartości nominalnej 1.500.000.000 PLZ [150.000 PLN], reprezentujących <strong>30% kapitału</strong>.</p>
+
+            <p><strong>§ 14. [Zastrzeżenie Umorzenia i Wyłączenie Dziedziczenia]</strong><br>
+            1. Wstąpienie spadkobierców zmarłego wspólnika do Spółki jest wyłączone.<br>
+            2. Udziały zmarłego wspólnika podlegają automatycznemu umorzeniu z chwilą jego śmierci.<br>
+            3. Spadkobiercom zmarłego wspólnika przysługuje wyłącznie spłata w wysokości wartości nominalnej objętych udziałów wyliczonej według stanu z dnia zawiązania Spółki z 1992 r., płatna w terminie 12 miesięcy od dnia okazania aktu zgonu.</p>
+
+            <p><strong>§ 22. [Pobór Taksy i Opłat]</strong><br>
+            Pobrano taksę notarialną na podstawie § 8 Rozporządzenia Ministra Sprawiedliwości w kwocie 45.000.000 PLZ oraz opłatę skarbową.</p>
+
+            <div class="seal-container">
+                <!-- POPRAWIONA PIECZĘĆ NOTARIUSZA SVG (z pełnym słowem NOTARIUSZ) -->
+                <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="notary-upper" d="M 22,80 A 58,58 0 0,1 138,80" fill="none" />
+                        <path id="notary-lower" d="M 22,80 A 58,58 0 0,0 138,80" fill="none" />
+                    </defs>
+                    <circle cx="80" cy="80" r="76" fill="none" stroke="#6b21a8" stroke-width="2.5" />
+                    <circle cx="80" cy="80" r="69" fill="none" stroke="#6b21a8" stroke-width="1" stroke-dasharray="2,2" />
+                    <circle cx="80" cy="80" r="46" fill="none" stroke="#6b21a8" stroke-width="1.5" />
+                    <g fill="#6b21a8" font-family="Arial, sans-serif" font-size="7.5pt" font-weight="bold" letter-spacing="0.8px">
+                        <text text-anchor="middle"><textPath href="#notary-upper" startOffset="50%">KRYSTYNA STAROWIEYSKA</textPath></text>
+                        <text text-anchor="middle" dy="10"><textPath href="#notary-lower" startOffset="50%">NOTARIUSZ W GRYFOWIE WLKP.</textPath></text>
+                    </g>
+                    <!-- Godło Orła w środku -->
+                    <g transform="translate(80, 80) scale(0.75)" fill="#6b21a8">
+                        <path d="M -15,-20 L -5,-30 L 0,-25 L 5,-30 L 15,-20 L 22,-5 L 15,15 L 0,25 L -15,15 L -22,-5 Z" stroke="#6b21a8" stroke-width="1.5" fill="none"/>
+                        <circle cx="0" cy="-10" r="3.5" />
+                        <line x1="-12" y1="0" x2="12" y2="0" stroke="#6b21a8" stroke-width="2"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Jan Nowakowski
+            </div>
+            <div class="signature-block" style="float: left;">
+                <div class="signature-line"></div>
+                Adam Nieznanowski
+            </div>
+            <div class="clearfix"></div>
+            <br>
+            <div class="signature-block" style="float: left;">
+                <div class="signature-line"></div>
+                Marek Nieznanowski
+            </div>
+            <div class="signature-block" style="float: right;">
+                <div class="signature-line"></div>
+                Notariusz Krystyna Starowieyska
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A3: PEŁNY ODPIS Z SĄDU REJESTROWEGO Z POPRAWIONĄ I WYSRODKOWANĄ PIECZĘCIĄ -->
+        <div id="docA3" class="doc-page">
+            <div class="krs-wrapper">
+                <div class="krs-header">
+                    <strong>R Z E C Z P O S P O L I T A &nbsp; P O L S K A</strong><br>
+                    <strong>KRAJOWY REJESTR SĄDOWY</strong><br>
+                    Sąd Rejonowy w Gryfowie Wielkopolskim XII Wydział Gospodarczy KRS<br>
+                    ul. Sądowa 2, 64-300 Gryfów Wielkopolski<br><br>
+                    <span style="font-size: 1.15rem; font-weight: bold; color: #0284c7;">ODPIS AKTUALNY Z REJESTRU PRZEDSIĘBIORCÓW</span><br>
+                    <small style="color: #475569;">Stan na dzień: 01.07.2026 r., godz. 10:14:02 | Identyfikator wydruku: KRS/2026/07/01-98231</small>
+                </div>
+
+                <div class="krs-section-title">DZIAŁ 1: DANE PODMIOTU I OZNACZENIE</div>
+                <div class="krs-subrow"><strong>1. Numer KRS:</strong> 0000098231 | <strong>2. NIP:</strong> 7771029381 | <strong>3. REGON:</strong> 630192831</div>
+                <div class="krs-subrow"><strong>4. Forma prawna:</strong> Spółka z ograniczoną odpowiedzialnością</div>
+                <div class="krs-subrow"><strong>5. Firma:</strong> PHU „NOWAKOWSKI-NIEZNANOWSKI” Spółka z o.o.</div>
+                <div class="krs-subrow"><strong>6. Siedziba i adres:</strong> ul. Przemysłowa 45, 64-300 Gryfów Wielkopolski</div>
+
+                <div class="krs-section-title">DZIAŁ 2: ORGAN ZARZĄDZAJĄCY I WSPÓLNICY</div>
+                <div class="krs-subrow"><strong>1. Kapitał zakładowy:</strong> 500.000,00 PLN (słownie: pięćset tysięcy złotych)</div>
+                <div class="krs-subrow"><strong>2. Zarząd:</strong> Jan Nowakowski – Prezes Zarządu (reprezentacja jednoosobowa)</div>
+                <br>
+                <p class="no-indent" style="font-weight: bold; font-size: 0.85rem;">3. Wykaz Wspólników i Struktura Udziałowa:</p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Lp.</th>
+                            <th>Imię i Nazwisko wspólnika</th>
+                            <th>Liczba posiadanych udziałów</th>
+                            <th>Łączna wartość nominalna</th>
+                            <th>Udział w kapitale (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Jan Nowakowski (Prezes Zarządu)</td>
+                            <td>400 udziałów</td>
+                            <td>200.000,00 PLN</td>
+                            <td>40,00%</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Marek Nieznanowski</td>
+                            <td>300 udziałów</td>
+                            <td>150.000,00 PLN</td>
+                            <td>30,00%</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Adam Nieznanowski (Zmarły dnia 10.11.1998 r.)</td>
+                            <td>300 udziałów</td>
+                            <td>150.000,00 PLN</td>
+                            <td>30,00%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="notary-clause" style="margin: 10px 0; font-size: 0.78rem;">
+                    <strong>Adnotacja Sądu Rejestrowego:</strong> Pozycja nr 3 pozostaje niekreślona w rejestrze z uwagi na brak przedłożenia przez Zarząd Spółki dokumentów poświadczających formalne umorzenie udziałów zmarłego wspólnika lub uchwały o obniżeniu kapitału zakładowego.
+                </div>
+
+                <div class="krs-section-title">DZIAŁ 3: SPRAWOZDANIA FINANSOWE (WZMIANKI O ZŁOŻONYCH DOKUMENTACH)</div>
+                <div class="krs-subrow"><strong>Roczne Sprawozdanie Finansowe za rok 2023:</strong> Złożono dnia 12.06.2024 r. (zatwierdzone)</div>
+                <div class="krs-subrow"><strong>Roczne Sprawozdanie Finansowe za rok 2024:</strong> Złożono dnia 28.06.2025 r. (zatwierdzone)</div>
+                <div class="krs-subrow"><strong>Roczne Sprawozdanie Finansowe za rok 2025:</strong> Złożono dnia 10.06.2026 r. (zatwierdzone)</div>
+            </div>
+
+            <!-- POPRAWIONA I IDEALNIE WYŚRODKOWANA PIECZĘĆ KRS -->
+            <div class="seal-container">
+                <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="krs-upper" d="M 24,80 A 56,56 0 0,1 136,80" fill="none" />
+                        <path id="krs-lower" d="M 24,80 A 56,56 0 0,0 136,80" fill="none" />
+                    </defs>
+                    <circle cx="80" cy="80" r="74" fill="none" stroke="#0284c7" stroke-width="2.5" />
+                    <circle cx="80" cy="80" r="67" fill="none" stroke="#0284c7" stroke-width="1" stroke-dasharray="3,2" />
+                    <circle cx="80" cy="80" r="44" fill="none" stroke="#0284c7" stroke-width="1.5" />
+                    <g fill="#0284c7" font-family="Arial, sans-serif" font-size="7.5pt" font-weight="bold" letter-spacing="1px">
+                        <text text-anchor="middle"><textPath href="#krs-upper" startOffset="50%">SĄD REJONOWY W GRYFOWIE WLKP.</textPath></text>
+                        <text text-anchor="middle" dy="10"><textPath href="#krs-lower" startOffset="50%">XII WYDZIAŁ GOSPODARCZY KRS</textPath></text>
+                    </g>
+                    <g transform="translate(80, 80) scale(0.7)" fill="#0284c7">
+                        <path d="M -15,-20 L -5,-30 L 0,-25 L 5,-30 L 15,-20 L 22,-5 L 15,15 L 0,25 L -15,15 L -22,-5 Z" stroke="#0284c7" stroke-width="1.5" fill="none"/>
+                        <circle cx="0" cy="-10" r="3" />
+                        <line x1="-10" y1="0" x2="10" y2="0" stroke="#0284c7" stroke-width="2"/>
+                    </g>
+                </svg>
+            </div>
+            <p class="no-indent text-center" style="font-size: 0.8rem; color: #475569;">Za zgodność z oryginałem wydruku z Rejestru – Główny Specjalista Sądu Rejonowego</p>
+        </div>
+
+        <!-- DOKUMENT A4: FAKTURA VAT Z PETER OF BANK S.A. -->
+        <div id="docA4" class="doc-page">
+            <div class="header-left">
+                <strong>SPRZEDAWCA:</strong><br>
+                PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o.<br>
+                ul. Przemysłowa 45, 64-300 Gryfów Wielkopolski<br>
+                NIP: 7771029381 | REGON: 630192831<br><br>
+                <strong>BANK SPRZEDAWCY (DLA ROZLICZEŃ):</strong><br>
+                <span style="color: #1e3a8a; font-weight: bold; font-size: 0.95rem;">PETER OF BANK S.A. O/Gryfów Wlkp.</span><br>
+                NR RACHUNKU: <strong>49 1090 1012 0000 0001 9920 8821</strong><br>
+                SWIFT/BIC: POBNPLPW
+            </div>
+            <div class="header-right">
+                <strong style="font-size: 1.1rem; color: #0f172a;">FAKTURA VAT NR: FV/2026/04/112</strong><br><br>
+                Data wystawienia: 15.04.2026 r.<br>
+                Data sprzedaży: 14.04.2026 r.<br>
+                Forma płatności: Przelew bankowy (MPP)<br>
+                Termin zapłaty: 29.04.2026 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><hr style="border: 0; border-top: 2px solid #0f172a;"><br>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Lp.</th>
+                        <th>Nazwa towaru / usługi</th>
+                        <th>Ilość</th>
+                        <th>J.m.</th>
+                        <th>Cena netto</th>
+                        <th>Wartość netto</th>
+                        <th>Stawka VAT</th>
+                        <th>Kwota VAT</th>
+                        <th>Wartość brutto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Wynajem powierzchni logistycznej Hala A2 (Kwiecień 2026)</td>
+                        <td>1</td>
+                        <td>usł.</td>
+                        <td>150.000,00</td>
+                        <td>150.000,00</td>
+                        <td>23%</td>
+                        <td>34.500,00</td>
+                        <td>184.500,00 PLN</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+            <div style="float: right; width: 40%; text-align: right; line-height: 1.8;">
+                <p class="no-indent">Suma netto: <strong>150.000,00 PLN</strong></p>
+                <p class="no-indent">Suma VAT (23%): <strong>34.500,00 PLN</strong></p>
+                <p class="no-indent" style="font-size: 1.15rem; color: #1e3a8a; border-top: 2px solid #1e3a8a; padding-top: 4px;"><strong>RAZEM BRUTTO: 184.500,00 PLN</strong></p>
+            </div>
+            <div class="clearfix"></div>
+
+            <br>
+            <p class="no-indent" style="font-size: 0.85rem;">Słownie: sto osiemdziesiąt cztery tysiące pięćset złotych 00/100.</p>
+            <p class="no-indent" style="font-size: 0.8rem; font-style: italic;">Płatność dokonana na rachunek w <strong>Peter of Bank S.A.</strong> z zastosowaniem Mechanizmu Podzielonej Płatności (Split Payment).</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Jan Nowakowski – Prezes Zarządu
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A5: PRZEDSĄDOWE WEZWANIE DO ZAPŁATY / UJAWNIENIA -->
+        <div id="docA5" class="doc-page">
+            <div class="header-left">
+                <strong>KANCELARIA ADWOKACKA</strong><br>
+                adw. Michał Nowosolowski<br>
+                ul. Mickiewicza 14/2, 64-300 Gryfów Wlkp.<br>
+                Pełnomocnik Tomasza Nieznanowskiego
+            </div>
+            <div class="header-right">
+                Gryfów Wlkp., dnia 10 lipca 2026 r.<br>
+                <strong>PRZESYŁKA POLECONA (ZPO)</strong>
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <p class="no-indent"><strong>DO:</strong><br>
+            <strong>Zarząd PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o.</strong><br>
+            ul. Przemysłowa 45, 64-300 Gryfów Wielkopolski</p>
+
+            <br>
+            <h1>OSTATECZNE WEZWANIE PRZEDSĄDOWE</h1>
+            
+            <p>Działając w imieniu mojego Mocodawcy – Pana Tomasza Nieznanowskiego (zam. w Gryfowie Wlkp. przy ul. Kościuszki 14), na podstawie załączonego pełnomocnictwa, <strong>niniejszym ostatecznie wzywam Zarząd Spółki PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. do:</strong></p>
+
+            <ol style="margin-left: 30px; line-height: 1.8;">
+                <li>Niezwłocznego dokonania wpisu Pana Tomasza Nieznanowskiego do Księgi Udziałów Spółki jako przysługującego mu wspólnika posiadającego <strong>150 (sto pięćdziesiąt) udziałów</strong> stanowiących jego przypadający spadek po zmarłym ojcu Adamie Nieznanowskim (z łącznej puli 300 udziałów),</li>
+                <li>Wypłaty zaległej dywidendy przypadającej na wyżej wymienione 150 udziałów za rok obrotowy 2025 w kwocie <strong>120.000,00 PLN</strong> (słownie: sto dwadzieścia tysięcy złotych) wraz z odsetkami ustawowymi za opóźnienie od dnia 15 lipca 2025 r. do dnia zapłaty – na rachunek bankowy Mocodawcy.</li>
+            </ol>
+
+            <h3>UZASADNIENIE</h3>
+            <p>Spadkodawca Adam Nieznanowski zmarł w dniu 10 listopada 1998 r., posiadając w chwili śmierci 300 udziałów w Spółce stanowiących 30% kapitału zakładowego. Prawomocnym postanowieniem Sądu Rejonowego w Gryfowie Wlkp. z dnia 14 lutego 1999 r. (sygn. I Ns 114/99) spadek po zmarłym nabyli w udziałach po 1/2 żona Danuta Nieznanowska oraz syn Tomasz Nieznanowski.</p>
+            <p>Powoływanie się przez Zarząd na postanowienia § 14 umowy Spółki z 1992 r., mające rzekomo wyłączać wstąpienie spadkobierców i ograniczać spłatę do symbolicznej kwoty nominalnej z 1992 roku (po denominacji zaledwie 30 PLN), jest w świetle utrwalonego orzecznictwa Sądu Najwyższego oraz art. 183 KSH w zw. z art. 58 § 1 i 3 KC bezwzględnie nieważne i godzi w zasadę ekwiwalentności świadczeń.</p>
+            <p>W przypadku braku realizacji powyższych żądań w nieprzekraczalnym terminie <strong>7 dni od daty doręczenia niniejszego pisma</strong>, sprawa zostanie skierowana na drogę postępowania sądowego bez ponownych wezwań.</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                adw. Michał Nowosolowski
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A6: PEŁNY POZEW O USTALENIE -->
+        <div id="docA6" class="doc-page">
+            <div class="stamp stamp-incoming" style="float: right;">
+                SĄD REJONOWY W GRYFOWIE WLKP.<br>
+                WPŁYNĘŁO DNIA: 03.08.2026 R.<br>
+                Biuro Podawcze – Biuro A
+            </div>
+            <div class="header-left">
+                <strong>Pełnomocnik Powoda:</strong><br>
+                adw. Michał Nowosolowski<br>
+                Kancelaria Adwokacka w Gryfowie Wlkp.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <div class="meta-box" style="border-left-color: #1e3a8a;">
+                <strong>DO: SĄD REJONOWY W GRYFOWIE WIELKOPOLSKIM</strong><br>
+                <strong>V WYDZIAŁ GOSPODARCZY</strong><br>
+                ul. Sądowa 2, 64-300 Gryfów Wielkopolski<br><br>
+                <strong>POWÓD:</strong> Tomasz Nieznanowski, PESEL: 88041209312<br>
+                <strong>POZWANY:</strong> PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o., KRS: 0000098231<br>
+                <strong>WPS (Wartość Przedmiotu Sporu):</strong> 270.000,00 PLN (150.000 PLN wartość udziałów + 120.000 PLN dywidenda)
+            </div>
+
+            <h1>POZEW O USTALENIE WSTĄPIENIA W PRAWA WSPÓLNIKA I ZAPŁATĘ</h1>
+
+            <p class="no-indent">Działając imieniem Powoda, wnoszę o:</p>
+            <ol style="margin-left: 25px; line-height: 1.8;">
+                <li>Ustalenie na podstawie art. 189 KPC, że Powód Tomasz Nieznanowski vstąpił w prawa wspólnika spółki pod firmą PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. w zakresie <strong>150 (stu pięćdziesięciu) udziałów</strong> o łącznej wartości nominalnej 75.000,00 PLN z dniem otwarcia spadku po Adamie Nieznanowskim (tj. 10 listopada 1998 r.),</li>
+                <li>Zasądzanie od Pozwanej na rzecz Powoda kwoty <strong>120.000,00 PLN</strong> z tytułu należnej dywidendy za rok 2025 wraz z odsetkami ustawowymi od dnia 15 lipca 2025 r. do dnia zapłaty,</li>
+                <li>Zasądzanie od Pozwanej na rzecz Powoda kosztów procesu według norm przepisanych.</li>
+            </ol>
+
+            <h3>UZASADNIENIE (FRAGMENTY)</h3>
+            <p>Ojciec Powoda Adam Nieznanowski był współzałożycielem Pozwanej Spółki i właścicielem 300 udziałów stanowiących 30% kapitału zakładowego. Po jego śmierci w 1998 r. Spółka odmówiła ujęcia Powoda w Księdze Udziałów, powołując się na § 14 umowy Spółki. Zapis ten, przewidujący spłatę według wartości z 1992 roku, pozostaje sprzeczny z ustawową naturą spółki z o.o. i stanowi próby pozbawienia spadkobiercy substancji majątkowej.</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                adw. Michał Nowosolowski
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A7: ZAWIADOMIENIE O OTWARCIU SPADKU (1999) -->
+        <div id="docA7" class="doc-page">
+            <div class="header-left">
+                <strong>Danuta Nieznanowska</strong><br>
+                <strong>Tomasz Nieznanowski</strong><br>
+                ul. Kościuszki 14, 64-300 Gryfów Wlkp.
+            </div>
+            <div class="header-right">
+                Gryfów Wlkp., dnia 02 marca 1999 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <p class="no-indent"><strong>DO: Zarządu PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o.</strong><br>
+            ul. Przemysłowa 45, Gryfów Wielkopolski</p>
+
+            <br>
+            <h1>ZAWIADOMIENIE O NABYCIU SPADKU I ZGŁOSZENIE WSPÓŁUPRAWNIONYCH</h1>
+
+            <p>Niniejszym formalnie zawiadamiamy Zarząd Spółki, iż na mocy prawomocnego Postanowienia Sądu Rejonowego w Gryfowie Wielkopolskim z dnia 14 lutego 1999 r. (sygn. akt I Ns 114/99) spadek po zmarłym w dniu 10 listopada 1998 r. wspólniku Adamie Nieznanowskim (posiadającym 300 udziałów) nabyli na podstawie ustawy:</p>
+            
+            <p class="no-indent" style="margin-left: 30px;">1. Danuta Nieznanowska (żona) – w 1/2 części,</p>
+            <p class="no-indent" style="margin-left: 30px;">2. Tomasz Nieznanowski (syn) – w 1/2 części.</p>
+
+            <p>Przesyłając w załączeniu uwierzytelniony odpis powyższego postanowienia, wnosimy o niezwłoczne dokonanie stosownych wpisów w Księdze Udziałów Pozwanej Spółki oraz zawiadamianie nas o wszelkich Zgromadzeniach Wspólników.</p>
+
+            <div class="stamp stamp-incoming" style="margin-top: 30px;">
+                ZARZĄD PHU NOWAKOWSKI-NIEZNANOWSKI SP. Z O.O.<br>
+                WPŁYNĘŁO: DNIA 05.03.1999 R.<br>
+                Podpis odbiorcy: [Podpis nieczytelny - J. Nowakowski]
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Tomasz Nieznanowski
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT A8: ANALITYKA KSIĘGOWA (KONTO 801 / 234) -->
+        <div id="docA8" class="doc-page">
+            <h2>WYCIĄG Z ANATOLITYKI KSIĘGOWEJ SPÓŁKI za lata 1998–2025</h2>
+            <p class="no-indent">Spółka: PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. | System Księgowy COARCH CDN XL</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Konto analityczne</th>
+                        <th>Opis analityczny / Wyszczególnienie</th>
+                        <th>Kwota Wn (PLN)</th>
+                        <th>Kwota Ma (PLN)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>801-1</td>
+                        <td>Kapitał zakładowy – Jan Nowakowski (400 udz. / 40%)</td>
+                        <td>0,00</td>
+                        <td>200.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>801-2</td>
+                        <td>Kapitał zakładowy – Marek Nieznanowski (300 udz. / 30%)</td>
+                        <td>0,00</td>
+                        <td>150.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>801-3</td>
+                        <td>Kapitał zakładowy – Adam Nieznanowski (300 udz. / 30% - Zmarły)</td>
+                        <td>0,00</td>
+                        <td>150.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>234-9/1998</td>
+                        <td>Rezerwa na spłatę nominalną udziałów zmarłego wspólnika</td>
+                        <td>0,00</td>
+                        <td>30,00</td>
+                    </tr>
+                    <tr>
+                        <td>820-01/2025</td>
+                        <td>Niewypłacona dywidenda zatrzymana na kapitale zapasowym</td>
+                        <td>0,00</td>
+                        <td>1.200.000,00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="no-indent" style="font-size: 0.85rem; font-style: italic;">Uwaga Biegłego Księgowego: Środki zarezerwowane na spłatę nominalną z 1998 r. nie zostały nigdy podjęte z rachunku depozytowego przez spadkobierców z uwagi na spór prawny.</p>
+        </div>
+
+        <!-- DOKUMENT B1: PROTOKÓŁ ZZW I UCHWAŁA DYWIDENDOWA (2025) -->
+        <div id="docB1" class="doc-page">
+            <h2>PROTOKÓŁ ZWYCZAJNEGO ZGROMADZENIA WSPÓLNIKÓW</h2>
+            <p class="no-indent">Sporządzony w dniu 28 czerwca 2025 r. w siedzibie PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o.</p>
+
+            <p>Na Zgromadzeniu stawili się wspólnicy:</p>
+            <p class="no-indent" style="margin-left: 20px;">1. <strong>Jan Nowakowski</strong> – reprezentujący 400 udziałów (40% kapitału),</p>
+            <p class="no-indent" style="margin-left: 20px;">2. <strong>Marek Nieznanowski</strong> – reprezentujący 300 udziałów (30% kapitału).</p>
+
+            <p class="no-indent">Przewodniczący Zgromadzenia Jan Nowakowski stwierdził, że reprezentowane jest 70% kapitału zakładowego i Zgromadzenie jest zdolne do podejmowania wiążących uchwał.</p>
+
+            <h3>UCHWAŁA NR 4/2025</h3>
+            <p>Zwyczajne Zgromadzenie Wspólników postanawia przeznaczyć zysk netto za rok obrotowy 2024 w kwocie <strong>400.000,00 PLN</strong> w całości do podziału między wspólników. Kwota dywidendy zostanie wypłacona w proporcji do udziałów uznawanych przez Zarząd:</p>
+            <ul style="margin-left: 30px;">
+                <li>Jan Nowakowski – 228.571,43 PLN (4/7 kwoty),</li>
+                <li>Marek Nieznanowski – 171.428,57 PLN (3/7 kwoty).</li>
+            </ul>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Jan Nowakowski – Przewodniczący
+            </div>
+            <div class="signature-block" style="float: left;">
+                <div class="signature-line"></div>
+                Marek Nieznanowski – Protokolant
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT B2: KSIĘGA UDZIAŁÓW -->
+        <div id="docB2" class="doc-page">
+            <h2>KSIĘGA UDZIAŁÓW PHU „NOWAKOWSKI-NIEZNANOWSKI” SP. Z O.O.</h2>
+            <p class="no-indent">Prowadzona zgodnie z art. 188 KSH. Stan na dzień: 01.07.2026 r.</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Lp.</th>
+                        <th>Imię i Nazwisko / Nazwa</th>
+                        <th>Liczba udziałów</th>
+                        <th>Wartość nominalna</th>
+                        <th>Wpisy i wzmianki o przejściu udziałów</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Jan Nowakowski</td>
+                        <td>400 (40%)</td>
+                        <td>200.000,00 PLN</td>
+                        <td>Objęte w akcie założycielskim z 12.11.1992 r. Wpis aktywny.</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Marek Nieznanowski</td>
+                        <td>300 (30%)</td>
+                        <td>150.000,00 PLN</td>
+                        <td>Objęte w akcie założycielskim z 12.11.1992 r. Wpis aktywny.</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Adam Nieznanowski</td>
+                        <td>300 (30%)</td>
+                        <td>150.000,00 PLN</td>
+                        <td>Zmarł 10.11.1998 r. Wzmianka: Udziały wygasłe z mocy § 14 umowy spółki. Niewypłacony ekwiwalent: 30 PLN.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DOKUMENT B3: ODPOWIEDŹ NA WEZWANIE PRZEDSĄDOWE -->
+        <div id="docB3" class="doc-page">
+            <div class="header-left">
+                <strong>PETER OF LAW Sp.p.</strong><br>
+                Kancelaria Radców Prawnych<br>
+                ul. Sądowa 8, Gryfów Wlkp.
+            </div>
+            <div class="header-right">
+                Gryfów Wlkp., dnia 20 lipca 2026 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <p class="no-indent"><strong>DO: adw. Michał Nowosolowski</strong><br>
+            Pełnomocnik Tomasza Nieznanowskiego</p>
+
+            <br>
+            <h1>ODPOWIEDŹ NA WEZWANIE PRZEDSĄDOWE</h1>
+
+            <p>W odpowiedzi na pismo z dnia 10 lipca 2026 r., działając w imieniu Zarządu PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o., <strong>kategorycznie odmawiamy spełnienia zgłoszonych roszczeń</strong>.</p>
+            <p>Zapis § 14 umowy Spółki z 1992 r. jednoznacznie wyłączał wstąpienie spadkobierców zmarłego wspólnika do Spółki, stanowiąc legalne zastrzeżenie umowne w oparciu o autonomię woli stron. Wszelkie roszczenia majątkowe spadkobierców o wypłatę ekwiwalentu uległy przedawnieniu najpóźniej z końcem 2008 roku.</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                r. pr. Piotr Nowaziński
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT B4: ODPOWIEDŹ NA POZEW -->
+        <div id="docB4" class="doc-page">
+            <div class="stamp stamp-incoming" style="float: right;">
+                SĄD REJONOWY W GRYFOWIE WLKP.<br>
+                WPŁYNĘŁO DNIA: 18.08.2026 R.
+            </div>
+            <div class="header-left">
+                <strong>Pełnomocnik Pozwanej:</strong><br>
+                r. pr. Piotr Nowaziński<br>
+                Kancelaria PETER OF LAW Sp.p.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <p class="no-indent"><strong>DO: SĄD REJONOWY W GRYFOWIE WLKP. – V WYDZIAŁ GOSPODARCZY</strong><br>
+            Sygnatura akt: <strong>V GC 412/26</strong></p>
+
+            <h1>ODPOWIEDŹ NA POZEW</h1>
+
+            <p class="no-indent">Działając w imieniu Pozwanej Spółki, wnoszę o:</p>
+            <ol style="margin-left: 25px; line-height: 1.8;">
+                <li>Oddalenie powództwa w całości jako całkowicie bezzasadnego,</li>
+                <li>Zasądzanie od Powoda na rzecz Pozwanej kosztów procesu według norm przepisanych.</li>
+            </ol>
+
+            <h3>PODNOSZONE ZARZUTY:</h3>
+            <p>1. Zarzut braku interesu prawnego po stronie Powoda w rozumieniu art. 189 KPC z uwagi na brak uprzedniego wystąpienia z powództwem o działy spadku.<br>
+            2. Zarzut przedawnienia roszczeń majątkowych (art. 118 KC).<br>
+            3. Zarzut nadużycia prawa podmiotowego (art. 5 KC) z uwagi na bierne oczekiwanie Powoda przez okres ponad 27 lat na wzrost wartości rynkowej Spółki.</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                r. pr. Piotr Nowaziński
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT B5: BILANS SPÓŁKI ZA ROK 2025 -->
+        <div id="docB5" class="doc-page">
+            <h2>BILANS I RACHUNEK ZYSKÓW I STRAT NA DZIEŃ 31.12.2025 R.</h2>
+            <p class="no-indent">Jednostka: PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. (dane w PLN)</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>AKTYWA</th><th>Kwota (PLN)</th>
+                        <th>PASYWA</th><th>Kwota (PLN)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>A. Aktywa trwałe (Hale i Nieruchomości)</td><td>4.200.000,00</td>
+                        <td>A. Kapitał własny</td><td>3.800.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>B. Aktywa obrotowe (Środki w Banku)</td><td>1.100.000,00</td>
+                        <td>– Kapitał zakładowy</td><td>500.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>– Należności handlowe</td><td>350.000,00</td>
+                        <td>– Kapitał zapasowy</td><td>3.300.000,00</td>
+                    </tr>
+                    <tr>
+                        <td>– Środki pieniężne w Peter of Bank S.A.</td><td>750.000,00</td>
+                        <td>B. Zobowiązania krótkoterminowe</td><td>1.500.000,00</td>
+                    </tr>
+                    <tr>
+                        <th>SUMA AKTYWÓW</th><th>5.300.000,00</th>
+                        <th>SUMA PASYWÓW</th><th>5.300.000,00</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DOKUMENT C1: ZARZĄDZENIE SĘDZIEGO -->
+        <div id="docC1" class="doc-page">
+            <div class="header-left">
+                <strong>SĄD REJONOWY W GRYFOWIE WLKP.</strong><br>
+                V Wydział Gospodarczy
+            </div>
+            <div class="header-right">
+                Sygn. akt: <strong>V GC 412/26</strong><br>
+                Dnia 12 sierpnia 2026 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <h1>ZARZĄDZENIE PRZEWODNICZĄCEGO</h1>
+
+            <p class="no-indent">Sędzia SR Grzegorz Urbański zarządza:</p>
+            <ol style="margin-left: 30px; line-height: 1.8;">
+                <li>Doręczyć odpis pozwu wraz z załącznikami pełnomocnikowi Pozwanej Spółki, zobowiązując do złożenia odpowiedzi na pozew w terminie 14 dni pod rygorem pominięcia spóźnionych dowodów (art. 206 § 2 KPC),</li>
+                <li>Wyznaczyć termin posiedzenia przygotowawczego / rozprawy na dzień <strong>15 września 2026 r., godz. 10:00, sala 104</strong>,</li>
+                <li>Zażądać z archiwum Wydziału I Cywilnego akt sprawy I Ns 114/99 i dołączyć je do akt niniejszej sprawy.</li>
+            </ol>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Sędzia SR Grzegorz Urbański
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT C2: POSTANOWIENIE O ZABEZPIECZENIU -->
+        <div id="docC2" class="doc-page">
+            <div class="header-left">
+                <strong>SĄD REJONOWY W GRYFOWIE WLKP.</strong><br>
+                V Wydział Gospodarczy
+            </div>
+            <div class="header-right">
+                Sygn. akt: <strong>V GC 412/26</strong><br>
+                Dnia 25 sierpnia 2026 r.
+            </div>
+            <div class="clearfix"></div>
+
+            <br><br>
+            <h1>POSTANOWIENIE O ZABEZPIECZENIU</h1>
+            <p class="no-indent" style="text-align: center; font-weight: bold;">W IMIENIU RZECZYPOSPOLITEJ POLSKIEJ</p>
+            <br>
+            <p class="no-indent">Sąd Rejonowy w Gryfowie Wielkopolskim V Wydział Gospodarczy w składzie Sędzia SR Grzegorz Urbański po rozpoznaniu wniosku Powoda o zabezpieczenie powództwa,</p>
+
+            <h3>POSTANAWIA:</h3>
+            <p class="no-indent">1. Udzielić zabezpieczenia roszczeniu Powoda poprzez zajęcie środków pieniężnych Pozwanej Spółki znajdujących się na rachunku bankowym w <strong>Peter of Bank S.A.</strong> do kwoty <strong>120.000,00 PLN</strong> (sto dwadzieścia tysięcy złotych),</p>
+            <p class="no-indent">2. Nakazać Pozwanej wpłatę zajętej kwoty do depozytu sądowego w terminie 7 dni.</p>
+
+            <div class="seal-container">
+                <svg width="150" height="150" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="sr-upper2" d="M 26,80 A 54,54 0 0,1 134,80" fill="none" />
+                        <path id="sr-lower2" d="M 26,80 A 54,54 0 0,0 134,80" fill="none" />
+                    </defs>
+                    <circle cx="80" cy="80" r="74" fill="none" stroke="#b91c1c" stroke-width="3" />
+                    <circle cx="80" cy="80" r="67" fill="none" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3,2" />
+                    <circle cx="80" cy="80" r="44" fill="none" stroke="#b91c1c" stroke-width="1.5" />
+                    <g fill="#b91c1c" font-family="Arial, sans-serif" font-size="8.5pt" font-weight="bold" letter-spacing="1px">
+                        <text text-anchor="middle"><textPath href="#sr-upper2" startOffset="50%">SĄD REJONOWY</textPath></text>
+                        <text text-anchor="middle" dy="11"><textPath href="#sr-lower2" startOffset="50%">W GRYFOWIE WLKP.</textPath></text>
+                    </g>
+                    <g transform="translate(80, 82) scale(0.9)" stroke="#b91c1c" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="0" y1="-22" x2="0" y2="14" stroke-width="2.2" />
+                        <line x1="-12" y1="14" x2="12" y2="14" stroke-width="2.5" />
+                        <circle cx="0" cy="-23" r="2" fill="#b91c1c" />
+                        <line x1="-19" y1="-14" x2="19" y2="-14" stroke-width="2.0" />
+                        <line x1="-19" y1="-14" x2="-25" y2="-1" stroke-width="0.9" />
+                        <line x1="-19" y1="-14" x2="-13" y2="-1" stroke-width="0.9" />
+                        <path d="M -27 -1 Q -19 5 -11 -1 Z" fill="#b91c1c" stroke-width="1" />
+                        <line x1="19" y1="-14" x2="13" y2="-1" stroke-width="0.9" />
+                        <line x1="19" y1="-14" x2="25" y2="-1" stroke-width="0.9" />
+                        <path d="M 11 -1 Q 19 5 27 -1 Z" fill="#b91c1c" stroke-width="1" />
+                    </g>
+                </svg>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                Sędzia SR Grzegorz Urbański
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+        <!-- DOKUMENT C3: DOŁĄCZONE AKTA SPADKOWE (I Ns 114/99) -->
+        <div id="docC3" class="doc-page">
+            <div class="meta-box" style="border-left-color: #b45309;">
+                <strong>SĄD REJONOWY W GRYFOWIE WIELKOPOLSKIM</strong><br>
+                <strong>V WYDZIAŁ GOSPODARCZY</strong><br><br>
+                <strong>ZAŁĄCZNIK ARCHIWALNY DO AKT SPRAWY V GC 412/26:</strong><br>
+                Kompletna kopia akt I Wydziału Cywilnego sygn. <strong>I Ns 114/99</strong> (Sprawa z wniosku Danuty Nieznanowskiej o stwierdzenie nabycia spadku po Adamie Nieznanowskim).
+            </div>
+
+            <h2>NOTATKA URZĘDOWA O ZAŁĄCZENIU AKT</h2>
+            <p class="no-indent">Dnia 20 sierpnia 2026 r. Kierownik Sekretariatu V Wydziału Gospodarczego dołączył do akt niniejszego postępowania oryginalną teczkę spraw I Ns 114/99 zawierającą 42 karty wraz z protokołami rozpraw i odpisami skróconymi aktów stanu cywilnego.</p>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                st. sekr. sądowy Ewa Kowalska
+            </div>
+            <div class="clearfix"></div>
+        </div>
+
+    </main>
+
+    <script>
+        function showDoc(docId, btn) {
+            const docs = document.querySelectorAll('.doc-page');
+            docs.forEach(doc => doc.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(docId).classList.add('active');
+            btn.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
