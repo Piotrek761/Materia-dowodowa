@@ -96,8 +96,11 @@ function adminFetchAll() {
     var statusEl = document.getElementById('adminStatus');
     if (statusEl) statusEl.textContent = 'Ladowanie danych...';
 
+    var apiUrl = getAdminApiUrl();
+    console.log('[Admin] Fetching from: ' + apiUrl + '?target=all');
+
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', getAdminApiUrl() + '?target=all', true);
+    xhr.open('GET', apiUrl + '?target=all', true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -107,13 +110,21 @@ function adminFetchAll() {
                 if (statusEl) statusEl.textContent = 'Dane zaladowane (' + adminCountItems(data) + ' pozycji)';
             } catch(e) {
                 if (statusEl) statusEl.textContent = 'Blad parsowania danych';
+                console.error('[Admin] Parse error:', e, 'Response:', xhr.responseText.substring(0, 200));
             }
         } else {
-            if (statusEl) statusEl.textContent = 'Blad ladowania (HTTP ' + xhr.status + ')';
+            var errMsg = 'Blad ladowania (HTTP ' + xhr.status + ')';
+            try {
+                var errData = JSON.parse(xhr.responseText);
+                if (errData.error) errMsg += ': ' + errData.error;
+            } catch(e) {}
+            if (statusEl) statusEl.textContent = errMsg;
+            console.error('[Admin] HTTP ' + xhr.status + ':', xhr.responseText);
         }
     };
     xhr.onerror = function() {
-        if (statusEl) statusEl.textContent = 'Blad sieci';
+        if (statusEl) statusEl.textContent = 'Blad sieci - sprawdz polaczenie i URL: ' + apiUrl;
+        console.error('[Admin] Network error connecting to:', apiUrl);
     };
     xhr.send();
 }

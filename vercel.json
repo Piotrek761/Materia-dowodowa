@@ -6,6 +6,18 @@
         "api/forum.js": {
             "memory": 128,
             "maxDuration": 10
+        },
+        "api/admin.js": {
+            "memory": 192,
+            "maxDuration": 15
+        },
+        "api/cases.js": {
+            "memory": 192,
+            "maxDuration": 15
+        },
+        "api/verdicts.js": {
+            "memory": 192,
+            "maxDuration": 15
         }
     }
 }

@@ -93,7 +93,7 @@ async function handlePost(req, res, headers, repo) {
 }
 
 async function handleCreate(req, res, headers, repo, verdicts, sha, manifestUrl) {
-    const { title, court, desc, presiding, judge, member, fileName, data, size } = req.body || {};
+    const { title, court, desc, type, presiding, judge, member, fileName, data, size } = req.body || {};
 
     if (!title || !court || !desc) {
         return res.status(400).json({ error: 'Tytuł, sąd i sentencja są wymagane' });
@@ -155,6 +155,7 @@ async function handleCreate(req, res, headers, repo, verdicts, sha, manifestUrl)
         title: title.trim(),
         court: court.trim(),
         desc: desc.trim(),
+        type: type || 'Inna',
         presiding: presiding || '',
         judge: judge || '',
         member: member || '',
@@ -255,7 +256,7 @@ async function handleDelete(req, res, headers, repo, verdicts, sha, manifestUrl)
 // EDIT — edytuj orzeczenie (wymaga kodu)
 // ============================================
 async function handleEdit(req, res, headers, repo, verdicts, sha, manifestUrl) {
-    const { idx, code, title, court, desc, presiding, judge, member, fileName, data, size } = req.body || {};
+    const { idx, code, title, court, desc, type, presiding, judge, member, fileName, data, size } = req.body || {};
 
     if (idx === undefined || idx === null) {
         return res.status(400).json({ error: 'Brak idx' });
@@ -325,6 +326,7 @@ async function handleEdit(req, res, headers, repo, verdicts, sha, manifestUrl) {
     if (title) v.title = title.trim();
     if (court) v.court = court.trim();
     if (desc) v.desc = desc.trim();
+    if (type) v.type = type;
     if (presiding !== undefined) v.presiding = presiding;
     if (judge !== undefined) v.judge = judge;
     if (member !== undefined) v.member = member;

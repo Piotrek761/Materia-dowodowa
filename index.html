@@ -185,6 +185,14 @@
                     </svg>
                     <span>Forum</span>
                 </button>
+                <button class="nav-item" data-tab="wpisy" role="tab" aria-selected="false"
+                    aria-controls="tab-wpisy">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span>Wsparcie</span>
+                </button>
                 <button class="nav-item" data-tab="o-projekcie" role="tab" aria-selected="false"
                     aria-controls="tab-o-projekcie">
                     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -291,31 +299,51 @@
             <p class="section-desc">Wybierz sprawę, aby otworzyć pełną teczkę akt w nowej karcie przeglądarki. Po
                 otwarciu dokumentu możesz go swobodnie przeglądać lub uruchomić funkcję drukowania (Ctrl+P), aby
                 przenieść akta do formy fizycznej.</p>
-            <div class="search-bar" style="margin-bottom:24px;">
-                <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="8.5" cy="8.5" r="6"/>
-                    <line x1="13" y1="13" x2="18" y2="18"/>
-                </svg>
-                <input type="text" id="sprawySearch" class="search-input" placeholder="Szukaj w sprawach..." autocomplete="off">
+            <div class="filter-bar">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="8.5" cy="8.5" r="6"/>
+                        <line x1="13" y1="13" x2="18" y2="18"/>
+                    </svg>
+                    <input type="text" id="sprawySearch" class="search-input" placeholder="Szukaj w sprawach..." autocomplete="off">
+                </div>
+                <div class="filter-select-wrap">
+                    <svg class="filter-select-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="5" x2="17" y2="5"/><line x1="5" y1="10" x2="15" y2="10"/><line x1="7" y1="15" x2="13" y2="15"/>
+                    </svg>
+                    <select id="sprawyTypeFilter" class="filter-select">
+                        <option value="">Wszystkie kategorie</option>
+                        <option value="gospodarcza">Gospodarcza</option>
+                        <option value="cywilna">Cywilna</option>
+                        <option value="upadlosciowa">Upadłościowa</option>
+                        <option value="restrukturyzacyjna">Restrukturyzacyjna</option>
+                        <option value="pracownicza">Pracownicza</option>
+                        <option value="administracyjna">Administracyjna</option>
+                        <option value="inna">Inna</option>
+                    </select>
+                </div>
             </div>
             <div id="sprawyGrid" class="cards-grid">
-                <div class="card" data-case="01">
+                <div class="card" data-case="01" data-type="gospodarcza">
                     <h3>Sprawa nr 01/2026</h3>
                     <p><strong>Sygnatura:</strong> I GKC 44/26</p>
+                    <p><strong>Kategoria:</strong> Gospodarcza</p>
                     <p>Kompleksowa teczka zawierająca pozew, dowody księgowe, rachunek przepływów oraz korespondencję
                         handlową w oparciu o KSH.</p>
                     <a href="sprawy/sprawa01.html" target="_blank" class="btn-action" rel="noopener">Otwórz teczkę</a>
                 </div>
-                <div class="card" data-case="02">
+                <div class="card" data-case="02" data-type="cywilna">
                     <h3>Sprawa nr 02/2026</h3>
                     <p><strong>Sygnatura:</strong> II C 108/26</p>
+                    <p><strong>Kategoria:</strong> Cywilna</p>
                     <p>Spór cywilny dotyczący naruszenia dóbr osobistych w obrocie gospodarczym. Materiał dowodowy
                         obejmuje korespondencję i opinie biegłych.</p>
                     <a href="sprawy/sprawa02.html" target="_blank" class="btn-action" rel="noopener">Otwórz teczkę</a>
                 </div>
-                <div class="card" data-case="03">
+                <div class="card" data-case="03" data-type="upadlosciowa">
                     <h3>Sprawa nr 03/2026</h3>
                     <p><strong>Sygnatura:</strong> III GC 215/26</p>
+                    <p><strong>Kategoria:</strong> Upadłościowa</p>
                     <p>Postępowanie upadłościowe z możliwością zawarcia układu. Analiza bilansu, listy wierzytelności i
                         sprawozdania zarządcy.</p>
                     <a href="sprawy/sprawa03.html" target="_blank" class="btn-action" rel="noopener">Otwórz teczkę</a>
@@ -331,12 +359,29 @@
             </div>
             <p class="section-desc">Oficjalna baza orzeczeń, wyroków i postanowień nadesłanych przez użytkowników w
                 formacie PDF w ramach prowadzonych symulacji procesowych.</p>
-            <div class="search-bar" style="margin-bottom:28px;">
-                <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="8.5" cy="8.5" r="6"/>
-                    <line x1="13" y1="13" x2="18" y2="18"/>
-                </svg>
-                <input type="text" id="verdictSearch" class="search-input" placeholder="Szukaj w orzeczeniach..." autocomplete="off">
+            <div class="filter-bar">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="8.5" cy="8.5" r="6"/>
+                        <line x1="13" y1="13" x2="18" y2="18"/>
+                    </svg>
+                    <input type="text" id="verdictSearch" class="search-input" placeholder="Szukaj w orzeczeniach..." autocomplete="off">
+                </div>
+                <div class="filter-select-wrap">
+                    <svg class="filter-select-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="5" x2="17" y2="5"/><line x1="5" y1="10" x2="15" y2="10"/><line x1="7" y1="15" x2="13" y2="15"/>
+                    </svg>
+                    <select id="verdictTypeFilter" class="filter-select">
+                        <option value="">Wszystkie kategorie</option>
+                        <option value="Gospodarcza">Gospodarcza</option>
+                        <option value="Cywilna">Cywilna</option>
+                        <option value="Upadłościowa">Upadłościowa</option>
+                        <option value="Restrukturyzacyjna">Restrukturyzacyjna</option>
+                        <option value="Pracownicza">Pracownicza</option>
+                        <option value="Administracyjna">Administracyjna</option>
+                        <option value="Inna">Inna</option>
+                    </select>
+                </div>
             </div>
             <div id="dynamic-verdicts">
                 <div class="empty-state" id="empty-verdicts-msg">
@@ -404,6 +449,24 @@
                         <input type="text" id="vCourt" required placeholder="np. Sąd Okręgowy w Gryfowie Wielkopolskim"
                             autocomplete="off">
                         <div class="field-feedback" id="vCourt-feedback"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="vType">
+                            <span class="label-icon" aria-hidden="true">&#x1F4C4;</span>
+                            Kategoria sprawy
+                            <span class="label-required" aria-label="wymagane">*</span>
+                        </label>
+                        <select id="vType" required style="width:100%;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-size:0.95rem;font-family:inherit;">
+                            <option value="">-- Wybierz kategorię --</option>
+                            <option value="Gospodarcza">Gospodarcza</option>
+                            <option value="Cywilna">Cywilna</option>
+                            <option value="Upadłościowa">Upadłościowa</option>
+                            <option value="Restrukturyzacyjna">Restrukturyzacyjna</option>
+                            <option value="Pracownicza">Pracownicza</option>
+                            <option value="Administracyjna">Administracyjna</option>
+                            <option value="Inna">Inna</option>
+                        </select>
+                        <div class="field-feedback" id="vType-feedback"></div>
                     </div>
                     <div class="form-group">
                         <label for="vPresiding">
@@ -625,12 +688,29 @@
             </div>
             <p class="section-desc">Autorskie kazusy i materiały dowodowe nadesłane przez uczestników symulacji. Każda sprawa wyświetla się z pełnym opisem, sygnaturą i danymi stron &mdash; podobnie jak sprawy oficjalne.</p>
 
-            <div class="search-bar">
-                <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="8.5" cy="8.5" r="6"/>
-                    <line x1="13" y1="13" x2="18" y2="18"/>
-                </svg>
-                <input type="text" id="communitySearch" class="search-input" placeholder="Szukaj w sprawach społeczności..." autocomplete="off">
+            <div class="filter-bar">
+                <div class="search-bar">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="8.5" cy="8.5" r="6"/>
+                        <line x1="13" y1="13" x2="18" y2="18"/>
+                    </svg>
+                    <input type="text" id="communitySearch" class="search-input" placeholder="Szukaj w sprawach społeczności..." autocomplete="off">
+                </div>
+                <div class="filter-select-wrap">
+                    <svg class="filter-select-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="5" x2="17" y2="5"/><line x1="5" y1="10" x2="15" y2="10"/><line x1="7" y1="15" x2="13" y2="15"/>
+                    </svg>
+                    <select id="communityTypeFilter" class="filter-select">
+                        <option value="">Wszystkie kategorie</option>
+                        <option value="Gospodarcza">Gospodarcza</option>
+                        <option value="Cywilna">Cywilna</option>
+                        <option value="Upadłościowa">Upadłościowa</option>
+                        <option value="Restrukturyzacyjna">Restrukturyzacyjna</option>
+                        <option value="Pracownicza">Pracownicza</option>
+                        <option value="Administracyjna">Administracyjna</option>
+                        <option value="Inna">Inna</option>
+                    </select>
+                </div>
             </div>
 
             <div class="section-head" style="margin-top:30px;">
@@ -913,6 +993,37 @@
                 <div class="empty-state" id="forum-empty-msg">
                     <div class="empty-state-title">Brak tematów na forum</div>
                     <p>Bądź pierwszy! Zadaj pytanie lub podziel się swoimi przemyśleniami na temat symulacji.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: WSPARCIE ===== -->
+        <div id="tab-wpisy" class="tab-content" role="tabpanel" aria-label="Wsparcie">
+            <div class="section-head">
+                <h2>Wsparcie Autora</h2>
+                <div class="section-head-line"></div>
+            </div>
+            <p class="section-desc">Tworzę <strong>Materię Dowodową</strong> całkowicie niekomercyjnie &mdash; z pasji do prawa i symulacji. Jeśli chcesz docenić moją pracę i postawić mi wirtualną kawę, będę bardzo wdzięczny! &lt;3</p>
+
+            <div style="max-width:480px;margin:30px auto;">
+                <div class="card" style="text-align:center;padding:36px 28px;">
+                    <div style="font-size:3.2rem;margin-bottom:8px;line-height:1;" aria-hidden="true">&#x2615;</div>
+                    <h3 style="margin-bottom:6px;font-size:1.4rem;">Postaw mi kawę!</h3>
+                    <p style="margin-bottom:6px;color:var(--text-muted);font-size:0.95rem;">
+                        Jeśli sprawia Ci radość granie &mdash; wyślij dowolną kwotę przez Tipply.<br>
+                        Przy wpłacie możesz też dodać od siebie wiadomość!
+                    </p>
+                    <p style="margin-bottom:26px;color:var(--text-muted);font-size:0.85rem;">
+                        W 100% dobrowolne &mdash; po prostu docenienie tego, co robię. &#x1F60A;
+                    </p>
+                    <div style="text-align:center;">
+                        <a href="tipply.pl/@peter-of-books" target="_blank" rel="noopener" class="btn-action" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 32px;font-size:1.05rem;text-decoration:none;">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            Wyślij przez Tipply
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

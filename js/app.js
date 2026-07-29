@@ -154,50 +154,121 @@
             // ============================================
             // UNIVERSAL SEARCH FILTER
             // ============================================
-            function setupSearch(inputId, containerSelector) {
-                var input = document.getElementById(inputId);
-                if (!input) return;
-                input.addEventListener('input', function () {
-                    var filter = this.value.toLowerCase().trim();
-                    var container = document.querySelector(containerSelector);
-                    if (!container) return;
-                    var items = container.querySelectorAll('.card, .info-card');
-                    var visibleCount = 0;
-
-                    items.forEach(function (item) {
-                        var text = item.textContent.toLowerCase();
-                        if (!filter || text.indexOf(filter) !== -1) {
-                            item.style.display = '';
-                            visibleCount++;
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-
-                    // Handle empty states
-                    var emptyStates = container.querySelectorAll('.empty-state');
-                    emptyStates.forEach(function (es) {
-                        es.style.display = (!filter || visibleCount === 0) ? '' : 'none';
-                    });
-
-                    // Clean up old "no results" messages
-                    var oldNoResults = container.querySelectorAll('.filter-no-results');
-                    oldNoResults.forEach(function (el) { el.remove(); });
-
-                    // Show "no results" if filter active but nothing visible
-                    if (filter && visibleCount === 0 && items.length > 0) {
-                        var noRes = document.createElement('div');
-                        noRes.className = 'empty-state filter-no-results';
-                        noRes.style.marginTop = '24px';
-                        noRes.innerHTML = '<div class="empty-state-title">Brak wyników</div><p>Nie znaleziono elementów pasujących do <strong>"' + escapeHtml(filter) + '"</strong>.</p>';
-                        container.appendChild(noRes);
+            // ============================================
+            // UNIFIED FILTER — łączy wyszukiwanie tekstowe + filtr kategorii
+            // ============================================
+            function getCurrentFilters(containerSelector) {
+                // Znajdź powiązane input search i select filter
+                var container = document.querySelector(containerSelector);
+                if (!container) return { search: '', type: '' };
+                var parent = container.parentElement || container;
+                // Szukamy inputów i selectów w obrębie tego samego kontenera lub poprzedzającego filter-bara
+                var searchInput = container.querySelector('.search-input');
+                if (!searchInput) {
+                    // Szukaj w poprzedzającym filter-bar
+                    var filterBar = container.previousElementSibling;
+                    if (filterBar && filterBar.classList.contains('filter-bar')) {
+                        searchInput = filterBar.querySelector('.search-input');
                     }
-                });
+                    if (!searchInput) {
+                        // Szukaj w całym dokumencie po id
+                        var searchIds = { '#sprawyGrid': 'sprawySearch', '#dynamic-verdicts': 'verdictSearch', '#tab-community': 'communitySearch' };
+                        for (var key in searchIds) {
+                            if (containerSelector.indexOf(key) !== -1) {
+                                searchInput = document.getElementById(searchIds[key]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                var typeSelect = container.querySelector('.filter-select');
+                if (!typeSelect) {
+                    var filterBar2 = container.previousElementSibling;
+                    if (filterBar2 && filterBar2.classList.contains('filter-bar')) {
+                        typeSelect = filterBar2.querySelector('.filter-select');
+                    }
+                }
+                if (!typeSelect) {
+                    var typeIds = { '#sprawyGrid': 'sprawyTypeFilter', '#dynamic-verdicts': 'verdictTypeFilter', '#tab-community': 'communityTypeFilter' };
+                    for (var key2 in typeIds) {
+                        if (containerSelector.indexOf(key2) !== -1) {
+                            typeSelect = document.getElementById(typeIds[key2]);
+                            break;
+                        }
+                    }
+                }
+                return {
+                    search: searchInput ? searchInput.value.toLowerCase().trim() : '',
+                    type: typeSelect ? typeSelect.value : ''
+                };
             }
 
-            setupSearch('sprawySearch', '#sprawyGrid');
-            setupSearch('communitySearch', '#tab-community');
-            setupSearch('verdictSearch', '#dynamic-verdicts');
+            function applyFilters(containerSelector) {
+                var container = document.querySelector(containerSelector);
+                if (!container) return;
+                var filters = getCurrentFilters(containerSelector);
+                var items = container.querySelectorAll('.card, .info-card');
+                var visibleCount = 0;
+
+                items.forEach(function (item) {
+                    var text = item.textContent.toLowerCase();
+                    var itemType = item.getAttribute('data-type') || '';
+                    var searchMatch = !filters.search || text.indexOf(filters.search) !== -1;
+                    var typeMatch = !filters.type || itemType === filters.type;
+
+                    if (searchMatch && typeMatch) {
+                        item.style.display = '';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Obsługa pustych stanów
+                var emptyStates = container.querySelectorAll('.empty-state:not(.filter-no-results)');
+                emptyStates.forEach(function (es) {
+                    es.style.display = (visibleCount === 0) ? '' : 'none';
+                });
+
+                // Clean up old "no results" messages
+                var oldNoResults = container.querySelectorAll('.filter-no-results');
+                oldNoResults.forEach(function (el) { el.remove(); });
+
+                // Show "no results" if filters active but nothing visible
+                if ((filters.search || filters.type) && visibleCount === 0 && items.length > 0) {
+                    var noRes = document.createElement('div');
+                    noRes.className = 'empty-state filter-no-results';
+                    noRes.style.marginTop = '24px';
+                    var msg = 'Nie znaleziono elementów';
+                    if (filters.search) msg += ' pasujących do <strong>"' + escapeHtml(filters.search) + '"</strong>';
+                    if (filters.type) msg += (filters.search ? ' w kategorii ' : ' w kategorii ') + '<strong>' + escapeHtml(filters.type) + '</strong>';
+                    noRes.innerHTML = '<div class="empty-state-title">Brak wyników</div><p>' + msg + '.</p>';
+                    container.appendChild(noRes);
+                }
+            }
+
+            function setupUnifiedFilter(searchInputId, typeFilterId, containerSelector) {
+                var searchInput = document.getElementById(searchInputId);
+                var typeFilter = document.getElementById(typeFilterId);
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function () {
+                        applyFilters(containerSelector);
+                    });
+                }
+                if (typeFilter) {
+                    typeFilter.addEventListener('change', function () {
+                        applyFilters(containerSelector);
+                    });
+                }
+            }
+
+            setupUnifiedFilter('sprawySearch', 'sprawyTypeFilter', '#sprawyGrid');
+            setupUnifiedFilter('verdictSearch', 'verdictTypeFilter', '#dynamic-verdicts');
+            setupUnifiedFilter('communitySearch', 'communityTypeFilter', '#tab-community');
+
+            // Eksportuj applyFilters globalnie, żeby można było wywołać po re-renderze
+            window.applyFilters = applyFilters;
 
             // ============================================
             // FORM HANDLING (Prześlij Orzeczenie)
@@ -226,9 +297,11 @@
                     // Validate
                     var isEditing = !!window._editingVerdict;
                     var hasError = false;
+                    var vtypeField = document.getElementById('vType');
                     var fields = [
                         { el: title, feedback: document.getElementById('vTitle-feedback'), name: 'Tytuł' },
                         { el: court, feedback: document.getElementById('vCourt-feedback'), name: 'Sąd' },
+                        { el: vtypeField, feedback: document.getElementById('vType-feedback'), name: 'Kategoria' },
                         { el: desc, feedback: document.getElementById('vDesc-feedback'), name: 'Sentencja' },
                         { el: fileInput, feedback: document.getElementById('vFile-feedback'), name: 'Plik PDF' }
                     ];
@@ -272,11 +345,13 @@
                         var presiding = document.getElementById('vPresiding');
                         var judge = document.getElementById('vJudge');
                         var member = document.getElementById('vMember');
+                        var vtype = document.getElementById('vType');
 
                         var verdictData = {
                             title: title.value.trim(),
                             court: court.value.trim(),
                             desc: desc.value.trim(),
+                            type: vtype ? vtype.value : 'Inna',
                             presiding: presiding ? presiding.value.trim() : '',
                             judge: judge ? judge.value.trim() : '',
                             member: member ? member.value.trim() : '',
@@ -298,6 +373,7 @@
                                     title: verdictData.title,
                                     court: verdictData.court,
                                     desc: verdictData.desc,
+                                    type: verdictData.type,
                                     presiding: verdictData.presiding,
                                     judge: verdictData.judge,
                                     member: verdictData.member
@@ -914,12 +990,14 @@
                         console.log('[DEBUG] loadCommunityCases: API returned ' + data.length + ' cases');
                         window._communityCases = data;
                         renderCommunityCases(data, pdfGrid, htmlGrid);
+                        if (typeof applyFilters === 'function') setTimeout(function() { applyFilters('#tab-community'); }, 50);
                     } else {
                         console.warn('[DEBUG] loadCommunityCases: API error, err=' + err + ', fallback to localStorage');
                         var local = JSON.parse(localStorage.getItem('md_community_cases') || '[]');
                         console.log('[DEBUG] loadCommunityCases: localStorage has ' + local.length + ' items');
                         window._communityCases = local;
                         renderCommunityCases(local, pdfGrid, htmlGrid);
+                        if (typeof applyFilters === 'function') setTimeout(function() { applyFilters('#tab-community'); }, 50);
                     }
                 });
             } else {
@@ -980,6 +1058,15 @@
                 card.style.animation = 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
 
                 var isLegacy = !c.title;
+                // Normalizuj typ: pierwsza litera wielka, reszta mała (dla kompatybilności z legacy danymi)
+                var rawType = c.type || '';
+                var cardType = rawType ? rawType.charAt(0).toUpperCase() + rawType.slice(1).toLowerCase() : 'Inna';
+                if (cardType === 'Gospodarcza' || cardType === 'Cywilna' || cardType === 'Upadłościowa' || cardType === 'Restrukturyzacyjna' || cardType === 'Pracownicza' || cardType === 'Administracyjna' || cardType === 'Inna') {
+                    // OK — znana kategoria
+                } else {
+                    cardType = 'Inna';
+                }
+                card.setAttribute('data-type', cardType);
 
                 if (isLegacy) {
                     var legacyDate = new Date(c.uploadedAt || Date.now());
@@ -1503,10 +1590,23 @@
             html += '<p style="margin:0;font-size:0.95rem;"><strong>Uwaga:</strong> Akty prawne z okresu PRL i II Rzeczypospolitej mają charakter archiwalny i nie wszystkie mogą być dostępne w cyfrowym repozytorium ISAP. Linki prowadzą do odpowiednich wpis&oacute;w w systemie &mdash; jeśli dokument nie jest dostępny online, oznacza to, że nie został jeszcze zdigitalizowany przez RCL.</p>';
             html += '</div>';
 
-            // Search bar
+            // Filter bar: search + era filter
+            html += '<div class="filter-bar">';
             html += '<div class="search-bar">';
             html += '<svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><line x1="13" y1="13" x2="18" y2="18"/></svg>';
             html += '<input type="text" id="legalSearch" class="search-input" placeholder="Szukaj w aktach prawnych..." autocomplete="off">';
+            html += '</div>';
+            html += '<div class="filter-select-wrap">';
+            html += '<svg class="filter-select-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+            html += '<line x1="3" y1="5" x2="17" y2="5"/><line x1="5" y1="10" x2="15" y2="10"/><line x1="7" y1="15" x2="13" y2="15"/>';
+            html += '</svg>';
+            html += '<select id="legalEraFilter" class="filter-select">';
+            html += '<option value="">Wszystkie epoki</option>';
+            html += '<option value="Współczesne">Współczesne (po 1989)</option>';
+            html += '<option value="PRL">PRL (1944-1989)</option>';
+            html += '<option value="II Rzeczpospolita">II RP (1918-1939)</option>';
+            html += '</select>';
+            html += '</div>';
             html += '</div>';
             html += '<div id="legalCodesCount" style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;"></div>';
 
@@ -1525,16 +1625,30 @@
                 });
             });
 
+            function getEraFilterValue() {
+                var el = document.getElementById('legalEraFilter');
+                return el ? el.value : '';
+            }
+
             function renderFilteredCodes(filter) {
                 var outputHtml = '';
                 var filterLower = filter ? filter.toLowerCase() : '';
+                var eraFilter = getEraFilterValue();
 
                 var filtered = allCodes.filter(function(c) {
-                    if (!filterLower) return true;
-                    return c.title.toLowerCase().indexOf(filterLower) !== -1 ||
-                           c.desc.toLowerCase().indexOf(filterLower) !== -1 ||
-                           c.date.indexOf(filterLower) !== -1 ||
-                           c._era.toLowerCase().indexOf(filterLower) !== -1;
+                    // Filtruj po epoce
+                    if (eraFilter) {
+                        var eraMatch = c._era.indexOf(eraFilter) !== -1;
+                        if (!eraMatch) return false;
+                    }
+                    // Filtruj po tekscie
+                    if (filterLower) {
+                        return c.title.toLowerCase().indexOf(filterLower) !== -1 ||
+                               c.desc.toLowerCase().indexOf(filterLower) !== -1 ||
+                               c.date.indexOf(filterLower) !== -1 ||
+                               c._era.toLowerCase().indexOf(filterLower) !== -1;
+                    }
+                    return true;
                 });
 
                 // Group by era
@@ -1591,16 +1705,24 @@
             initialWrapper.innerHTML = renderFilteredCodes('');
             container.appendChild(initialWrapper);
 
-            // Live search
+            // Live search + era filter
+            function refreshLegalCodes() {
+                var searchVal = document.getElementById('legalSearch') ? document.getElementById('legalSearch').value : '';
+                var resultsHtml = renderFilteredCodes(searchVal);
+                var resultsWrapper = document.getElementById('legal-codes-results');
+                if (resultsWrapper) {
+                    resultsWrapper.innerHTML = resultsHtml;
+                }
+            }
+
             var searchInput = document.getElementById('legalSearch');
             if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    var resultsHtml = renderFilteredCodes(this.value);
-                    var resultsWrapper = document.getElementById('legal-codes-results');
-                    if (resultsWrapper) {
-                        resultsWrapper.innerHTML = resultsHtml;
-                    }
-                });
+                searchInput.addEventListener('input', refreshLegalCodes);
+            }
+
+            var eraFilter = document.getElementById('legalEraFilter');
+            if (eraFilter) {
+                eraFilter.addEventListener('change', refreshLegalCodes);
             }
         }
 
@@ -2327,12 +2449,14 @@
                         console.log('[DEBUG] loadVerdicts: API returned ' + data.length + ' verdicts');
                         window._verdicts = data;
                         renderVerdicts(data);
+                        if (typeof applyFilters === 'function') setTimeout(function() { applyFilters('#dynamic-verdicts'); }, 50);
                     } else {
                         console.warn('[DEBUG] loadVerdicts: API error or invalid data, err=' + err + ', data=' + (data ? 'exists' : 'null'));
                         var local = JSON.parse(localStorage.getItem('md_verdicts') || '[]');
                         console.log('[DEBUG] loadVerdicts: fallback to localStorage, ' + local.length + ' items');
                         window._verdicts = local;
                         renderVerdicts(local);
+                        if (typeof applyFilters === 'function') setTimeout(function() { applyFilters('#dynamic-verdicts'); }, 50);
                     }
                 });
             } else {
@@ -2341,6 +2465,7 @@
                 console.log('[DEBUG] loadVerdicts: localStorage has ' + local.length + ' items');
                 window._verdicts = local;
                 renderVerdicts(local);
+                if (typeof applyFilters === 'function') setTimeout(function() { applyFilters('#dynamic-verdicts'); }, 50);
             }
         };
 
@@ -2389,8 +2514,16 @@
                 if (v.judge) panelHtml += '<p><strong>Sędzia sprawozdawca:</strong> ' + escapeHtml(v.judge) + '</p>';
                 if (v.member) panelHtml += '<p><strong>Sędziowie:</strong> ' + escapeHtml(v.member) + '</p>';
 
+                var vtypeVal = v.type || 'Inna';
+                var vtypeColors = {'Gospodarcza':'#d4af37','Cywilna':'#22c55e','Upadłościowa':'#ef4444','Restrukturyzacyjna':'#f59e0b','Pracownicza':'#3b82f6','Administracyjna':'#8b5cf6','Inna':'#6b7280'};
+                var vtypeColor = vtypeColors[vtypeVal] || '#6b7280';
+
+                card.setAttribute('data-type', vtypeVal);
                 card.innerHTML =
-                    '<h3>' + escapeHtml(v.title) + '</h3>' +
+                    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">' +
+                        '<h3 style="margin-bottom:0;flex:1;">' + escapeHtml(v.title) + '</h3>' +
+                        '<span style="font-size:0.7rem;padding:3px 10px;border-radius:4px;background:' + vtypeColor + '20;color:' + vtypeColor + ';border:1px solid ' + vtypeColor + '40;font-weight:600;">' + escapeHtml(vtypeVal) + '</span>' +
+                    '</div>' +
                     '<p style="margin-bottom:4px;"><strong>Organ orzekający:</strong> ' + escapeHtml(v.court) + '</p>' +
                     panelHtml +
                     (descPreview ? '<p style="margin-top:8px;font-size:0.95rem;">' + descPreview + '</p>' : '') +
