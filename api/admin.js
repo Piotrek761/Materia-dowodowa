@@ -451,8 +451,8 @@ async function handleModerateEdit(req, res, headers, repo) {
     }
 
     const manifestKey = target === 'spolecznosc' ? 'spolecznosc' : 'orzeczenia';
-    const { sha, data } = await getManifestWithSha(headers, repo, manifestKey);
-    let list = Array.isArray(data) ? data : [];
+    const { sha, data: manifestData } = await getManifestWithSha(headers, repo, manifestKey);
+    let list = Array.isArray(manifestData) ? manifestData : [];
     let idx = -1;
     if (itemId) idx = list.findIndex(x => x.id === itemId);
     if (idx === -1 && itemIdx !== undefined && itemIdx !== null) idx = parseInt(itemIdx);
