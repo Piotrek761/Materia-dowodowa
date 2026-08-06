@@ -2,57 +2,962 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator pism - Kancelaria Peter of Law | Materia Dowodowa</title>
+    <title>Materia Dowodowa - Generator Pism Procesowych</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bad+Script&family=Caveat:wght@600&family=Dancing+Script:wght@700&family=Great+Vibes&family=Marck+Script&family=Meie+Script&family=Parisienne&family=Pinyon+Script&family=Sacramento&family=Tangerine:wght@700&family=Zeyada&display=swap" rel="stylesheet">
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Times New Roman', Georgia, serif; background: #f5f3f0; color: #1a1a1a; line-height: 1.7; padding: 40px; font-size: 12pt; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 60px 80px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { font-size: 20pt; text-align: center; margin-bottom: 6px; letter-spacing: 2px; }
-        h2 { font-size: 14pt; margin-top: 30px; margin-bottom: 12px; border-bottom: 2px solid #1a1a1a; padding-bottom: 4px; }
-        .head { text-align: center; margin-bottom: 40px; }
-        .head-sub { font-size: 11pt; color: #555; }
-        label { display: block; margin-top: 18px; margin-bottom: 4px; font-weight: bold; font-size: 11pt; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #999; font-family: inherit; font-size: 11pt; }
-        textarea { min-height: 120px; }
-        .btn { display: inline-block; margin-top: 24px; padding: 12px 32px; background: #1a1a1a; color: #fff; border: none; cursor: pointer; font-size: 11pt; transition: 0.2s; }
-        .btn:hover { background: #333; }
-        .footer-line { margin-top: 60px; padding-top: 20px; border-top: 1px solid #999; font-size: 10pt; text-align: center; color: #666; }
-        @media print { body { padding: 0; background: #fff; } .container { box-shadow: none; padding: 40px; } .btn { display: none; } }
+        :root {
+            --bg-deep: #070913;
+            --panel-bg: #0c1222;
+            --panel-card: #121c38;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #d4af37;
+            --accent-hover: #b89728;
+            --btn-blue: #1b365d;
+            --btn-blue-hover: #142846;
+            --border: #1e3060;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 25px;
+            max-width: 1700px;
+            width: 100%;
+        }
+
+        .control-panel {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            flex: 1.2;
+            min-width: 620px;
+            box-sizing: border-box;
+            max-height: 94vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .document-preview {
+            background: #ffffff;
+            color: #000;
+            padding: 50px;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            flex: 1;
+            min-width: 600px;
+            max-width: 800px;
+            box-sizing: border-box;
+            max-height: 94vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .game-logo {
+            width: 70px;
+            height: 70px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        h2 {
+            font-size: 18px;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .section-box {
+            background: var(--panel-card);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .section-box h3 {
+            font-size: 13px;
+            color: var(--accent);
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 13px;
+            font-family: inherit;
+            background-color: #080d1a;
+            color: #fff;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background-color: #101932;
+        }
+
+        textarea.editor-box {
+            height: 220px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        button {
+            padding: 11px 15px;
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--btn-blue-hover);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-export {
+            background-color: var(--accent);
+            color: #000;
+            flex: 1;
+        }
+        .btn-export:hover {
+            background-color: var(--accent-hover);
+            color: #000;
+        }
+
+        .btn-pdf {
+            background-color: #8b1e1e;
+            flex: 1;
+        }
+        .btn-pdf:hover {
+            background-color: #6c1717;
+        }
+
+        .btn-json {
+            background-color: var(--btn-blue);
+            flex: 1;
+        }
+        .btn-json:hover {
+            background-color: var(--btn-blue-hover);
+        }
+
+        .file-upload-label {
+            background: #121c38;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            display: block;
+            font-weight: bold;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            border: 1px dashed var(--border);
+            transition: background 0.2s;
+        }
+        .file-upload-label:hover {
+            background: #1b2850;
+        }
+
+        .doc-page {
+            font-size: 13.5px;
+            color: #000;
+        }
+
+        .header-left {
+            float: left;
+            width: 55%;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .header-right {
+            float: right;
+            width: 40%;
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+
+        .recipient-box {
+            margin-left: 50%;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .doc-title-section {
+            text-align: center;
+            margin: 25px 0 20px 0;
+        }
+
+        .doc-main-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .doc-subtitle {
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .doc-content-body {
+            font-size: 0.93em;
+            line-height: 1.5;
+            text-align: justify;
+            white-space: pre-wrap;
+        }
+
+        .signature-section-wrapper {
+            margin-top: 35px;
+        }
+
+        .signature-block-right {
+            float: right;
+            width: 50%;
+            text-align: center;
+        }
+
+        .signature-line-draw {
+            border-bottom: 1px solid #000;
+            width: 80%;
+            margin: 0 auto 5px auto;
+            height: 50px;
+            position: relative;
+            line-height: 50px;
+            white-space: nowrap;
+        }
+
+        .sig-char {
+            display: inline-block;
+            color: #000080;
+            margin-right: -2px;
+            transform-origin: bottom center;
+        }
+
+        .attachments-box {
+            margin-top: 35px;
+            font-size: 0.8em;
+            color: #555;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: 11px;
+            margin-top: 3px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="head">
-            <h1>KANCELARIA PETER OF LAW</h1>
-            <div class="head-sub">Zaawansowany edytor dokumentów handlowych i korporacyjnych</div>
+
+    <div class="main-container">
+        <div class="control-panel">
+            <div class="panel-header">
+                <svg class="game-logo" version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254.000000 1254.000000" preserveAspectRatio="xMidYMid meet">
+                    <g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="#d4af37" stroke="#d4af37" stroke-width="40" stroke-linejoin="round">
+                        <path d="M4612 8063 l3 -2118 1110 0 1110 0 3 28 3 27 -1085 0 -1086 0 0 2060 0 2060 983 0 983 0 1 -292 c1 -161 2 -319 2 -350 l1 -58 350 0 350 0 0 -720 c0 -396 3 -720 8 -720 4 0 18 7 30 16 l22 15 0 722 0 722 -363 363 -362 362 -1033 0 -1032 0 2 -2117z m2388 1712 l295 -295 -303 0 -302 0 0 295 c0 162 3 295 8 295 4 0 140 -133 302 -295z"/>
+                        <path d="M7588 8283 c-52 -59 -72 -153 -43 -203 8 -14 14 -44 15 -66 0 -34 -5 -45 -25 -58 -14 -10 -31 -28 -37 -42 l-11 -24 -404 0 c-260 0 -411 -4 -424 -10 -21 -12 -25 -50 -7 -68 7 -7 22 -12 35 -12 13 0 23 -3 23 -8 0 -4 -43 -120 -96 -257 -52 -138 -130 -341 -172 -452 l-77 -203 -37 0 c-25 0 -38 -5 -38 -13 0 -22 52 -88 111 -142 183 -167 460 -178 660 -27 55 41 149 150 149 173 0 4 -19 9 -41 11 l-42 3 -163 430 c-89 237 -165 442 -169 458 l-7 27 346 0 346 0 10 -24 c4 -13 21 -33 36 -45 l27 -21 -6 -193 c-4 -105 -14 -388 -22 -627 -8 -239 -17 -486 -20 -547 l-6 -113 101 0 100 0 0 88 c0 85 -23 835 -36 1204 l-7 187 31 26 c17 14 34 35 37 45 6 19 18 20 341 20 184 0 334 -2 334 -5 0 -2 -56 -150 -124 -327 -68 -178 -145 -383 -172 -455 l-49 -133 -43 0 c-41 0 -42 -1 -31 -22 50 -97 163 -192 284 -239 50 -19 79 -23 170 -22 94 0 120 4 178 26 113 44 196 110 259 207 l29 45 -43 5 -43 5 -58 155 c-33 85 -111 289 -173 453 -63 164 -114 300 -114 302 0 3 13 5 28 5 33 0 52 16 52 45 0 45 -3 45 -425 45 l-402 0 -11 25 c-7 14 -23 30 -37 37 -21 10 -25 18 -25 57 0 26 6 55 14 66 34 50 25 116 -25 190 -28 40 -31 41 -51 18z"/>
+                    </g>
+                </svg>
+                <h2>Materia Dowodowa – Generator Pism Procesowych</h2>
+            </div>
+
+            <div class="section-box">
+                <h3>1. Nadawca Pisma</h3>
+                <div class="form-group">
+                    <label for="senderSelect">Wybierz nadawcę:</label>
+                    <select id="senderSelect" onchange="toggleSenderFields()">
+                        <option value="peter">Peter of Law Sp.p. (Domyślna)</option>
+                        <option value="lex">Kancelaria Adwokacka „LEX & PARTNERZY”</option>
+                        <option value="custom">[Niestandardowy / Własny]</option>
+                    </select>
+                </div>
+                <div id="senderCustomBox" style="display: none; margin-top: 10px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nazwa podmiotu / kancelarii:</label>
+                            <input type="text" id="sName" value="Kancelaria Niestandardowa" oninput="updateDocument()">
+                        </div>
+                        <div class="form-group">
+                            <label>Reprezentant / Adwokat:</label>
+                            <input type="text" id="sRep" value="adw. Jan Kowalski" oninput="updateDocument()">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ulica i numer:</label>
+                            <input type="text" id="sStreet" value="ul. Przykładowa 1" oninput="updateDocument()">
+                        </div>
+                        <div class="form-group">
+                            <label>Kod pocztowy i miasto:</label>
+                            <input type="text" id="sCity" value="00-000 Warszawa" oninput="updateDocument()">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefon:</label>
+                            <input type="text" id="sPhone" value="(22) 111-22-33" oninput="updateDocument()">
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail:</label>
+                            <input type="text" id="sEmail" value="biuro@kancelaria.pl" oninput="updateDocument()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>2. Adresat Pisma</h3>
+                <div class="form-group">
+                    <label for="recipientSelect">Wybierz adresata:</label>
+                    <select id="recipientSelect" onchange="toggleRecipientFields()">
+                        <option value="lex">Kancelaria Adwokacka „LEX & PARTNERZY” (adw. Michał Nowosolowski)</option>
+                        <option value="peter">Peter of Law Sp.p. (adw. Piotr Nowaźinski)</option>
+                        <option value="custom">[Niestandardowy / Własny adresat]</option>
+                    </select>
+                </div>
+                <div id="recipientCustomBox" style="display: none; margin-top: 10px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nazwa adresata:</label>
+                            <input type="text" id="rName" value="Kancelaria Adwokacka Testowa" oninput="updateDocument()">
+                        </div>
+                        <div class="form-group">
+                            <label>Reprezentant / Adwokat:</label>
+                            <input type="text" id="rRep" value="adw. Anna Nowak" oninput="updateDocument()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dodatkowa rola / pełnomocnictwo:</label>
+                        <input type="text" id="rRole" value="Pełnomocnik Powoda" oninput="updateDocument()">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ulica i numer:</label>
+                            <input type="text" id="rStreet" value="ul. Testowa 5" oninput="updateDocument()">
+                        </div>
+                        <div class="form-group">
+                            <label>Kod pocztowy i miasto:</label>
+                            <input type="text" id="rCity" value="61-700 Poznań" oninput="updateDocument()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>3. Metryka i Sygnatura</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cityDateInput">Miejscowość i data:</label>
+                        <input type="text" id="cityDateInput" value="Gryfów Wlkp., dnia 20 lipca 2026 r." oninput="updateDocument()">
+                    </div>
+                    <div class="form-group">
+                        <label for="ldzInput">Sygnatura / L.dz.:</label>
+                        <input type="text" id="ldzInput" value="L.dz. POL/2026/NN-842" oninput="updateDocument()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="dotyczyInput">Dotyczy:</label>
+                    <input type="text" id="dotyczyInput" value="Dotyczy: Wezwania z 10.07.2026 r." oninput="updateDocument()">
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>4. Tytuł i Przedmiot</h3>
+                <div class="form-group">
+                    <label for="titleInput">Tytuł główny pisma:</label>
+                    <input type="text" id="titleInput" value="ODPOWIEDŹ NA WEZWANIE PRZEDSĄDOWE" oninput="updateDocument()">
+                </div>
+                <div class="form-group">
+                    <label for="subtitleInput">Podtytuł / Działając w imieniu:</label>
+                    <input type="text" id="subtitleInput" value="Działającego w imieniu PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. z siedzibą w Gryfowie Wlkp." oninput="updateDocument()">
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>5. Treść Merytoryczna Pisma</h3>
+                <div class="form-group">
+                    <textarea id="contentEditor" class="editor-box" oninput="updateDocument()">Działając w imieniu mojego Mocodawcy – spółki pod firmą PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o. z siedzibą w Gryfowie Wielkopolskim (KRS: 0000128491), w odpowiedzi na przedsądowe wezwanie do zapłaty oraz wydania dokumentów korporacyjnych z dnia 10 lipca 2026 r. (doręczone dnia 12 lipca 2026 r.), niniejszym:
+
+KATEGORYCZNIE ODMIAWIAM SPEŁNIENIA ZGŁOSZONYCH ROSZCZEŃ W CAŁOŚCI.
+
+UZASADNIENIE
+
+1. Braki formalne i przedawnienie roszczeń majątkowych:
+Wskazać należy, że zgłoszone przez Pana Mocodawcę roszczenie o wypłatę rzekomo zaległych dywidend za lata 1999–2025 jest całkowicie bezpodstawne. Zgodnie z art. 118 Kodeksu cywilnego, roszczenia o świadczenia okresowe ulegają przedawnieniu z upływem 3 lat.
+
+2. Autonomia woli stron i skuteczność zapisów Umowy Spółki:
+Zapis § 14 aktu założycielskiego Spółki z dnia 12 listopada 1992 r. jednoznacznie wyłączał wstąpienie spadkobierców zmarłego wspólnika do Spółki, co opiera się na zasadzie swobody umów (art. 353[1] KC w zw. z art. 183 KSH).</textarea>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>6. Podpis i Załączniki</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="lawyerInput">Prowadzący Adwokat (Podpis):</label>
+                        <input type="text" id="lawyerInput" value="adw. Piotr Nowaźinski" oninput="validateLawyer(); updateDocument(); generateSignature();">
+                        <div id="lawyerError" class="error-msg">Niedozwolony wybór adwokatów: Piotr Nodwoziński lub Michał Nowosolowski!</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="lawyerDescInput">Opis pod adwokatem:</label>
+                        <input type="text" id="lawyerDescInput" value="Pełnomocnik PHU „NOWAKOWSKI-NIEZNANOWSKI” Sp. z o.o." oninput="updateDocument()">
+                    </div>
+                </div>
+                <button type="button" onclick="generateSignature()" style="width: 100%; margin-bottom: 10px;">Losuj nowy styl podpisu odręcznego</button>
+                <div class="form-group">
+                    <label for="attachmentsInput">Załączniki:</label>
+                    <textarea id="attachmentsInput" style="height: 50px;" oninput="updateDocument()">1. Pełnomocnictwo procesowe wraz z dowodem uiszczenia opłaty skarbowej.
+2. Odpis z KRS pozwanej Spółki.</textarea>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>7. Nazwa pliku do pobrania</h3>
+                <div class="form-group">
+                    <label for="filenameInput">Własna nazwa pliku (bez rozszerzenia):</label>
+                    <input type="text" id="filenameInput" value="odpowiedz_na_wezwanie_pismo">
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn-export" onclick="exportHTML()">Pobierz HTML (A4)</button>
+                <button type="button" class="btn-pdf" onclick="exportPDF()">Eksport do PDF (A4)</button>
+                <button type="button" class="btn-json" onclick="exportJSON()">Zapisz JSON</button>
+            </div>
+            <div>
+                <label for="importFile" class="file-upload-label">Wczytaj konfigurację z pliku JSON</label>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importJSON(event)">
+            </div>
         </div>
 
-        <h2>Dane dokumentu</h2>
-        <form onsubmit="alert('Funkcja generowania dokumentu zostanie uruchomiona w pełnej wersji systemu.'); return false;">
-            <label>Rodzaj dokumentu:</label>
-            <select>
-                <option>Umowa handlowa</option>
-                <option>Aneks do umowy</option>
-                <option>Porozumienie</option>
-                <option>Polisa ubezpieczeniowa</option>
-                <option>Inne</option>
-            </select>
+        <div class="document-preview" id="previewArea">
+            <div class="doc-page">
+                <div style="width: 100%; margin-bottom: 25px;">
+                    <div class="header-left" id="displaySender"></div>
+                    <div class="header-right">
+                        <span id="displayCityDate"></span><br><br>
+                        <span style="font-family: 'Courier New', Courier, monospace; font-size: 0.85em; color: #333;">
+                            <span id="displayLdz"></span><br>
+                            <span id="displayDotyczy"></span>
+                        </span>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
 
-            <label>Strony umowy:</label>
-            <input type="text" placeholder="Nazwa pierwszej strony">
-            <input type="text" placeholder="Nazwa drugiej strony" style="margin-top:8px;">
+                <div class="recipient-box" id="displayRecipient"></div>
 
-            <label>Przedmiot umowy:</label>
-            <textarea placeholder="Opisz przedmiot umowy..."></textarea>
+                <div class="doc-title-section">
+                    <h1 class="doc-main-title" id="displayTitle"></h1>
+                    <p class="doc-subtitle" id="displaySubtitle"></p>
+                </div>
 
-            <label>Wynagrodzenie / Wartość:</label>
-            <input type="text" placeholder="np. 100.000,00 PLN">
+                <div class="doc-content-body" id="displayContent"></div>
+            </div>
 
-            <button type="submit" class="btn">Generuj dokument</button>
-        </form>
+            <div>
+                <div class="signature-section-wrapper">
+                    <div class="signature-block-right">
+                        <div class="signature-line-draw" id="signatureContainer"></div>
+                        <strong style="font-size: 0.9em;" id="displayLawyerName"></strong><br>
+                        <span style="font-size: 0.8em; color: #444;" id="displayLawyerDesc"></span>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
 
-        <div class="footer-line">Kancelaria Peter of Law &copy; 2026 &mdash; Symulacja Materia Dowodowa</div>
+                <div class="attachments-box">
+                    <strong>Załączniki:</strong><br>
+                    <span id="displayAttachments" style="white-space: pre-wrap;"></span>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        const handwritingFonts = [
+            'Alex Brush', 'Allura', 'Bad Script', 'Caveat',
+            'Dancing Script', 'Great Vibes', 'Marck Script',
+            'Meie Script', 'Parisienne', 'Pinyon Script',
+            'Sacramento', 'Tangerine', 'Zeyada'
+        ];
+
+        const presetSenders = {
+            peter: {
+                name: "PETER OF LAW Sp.p.",
+                rep: "adw. Piotr Nowaźinski (nr wpisu: Poz-1482)",
+                street: "ul. Sądowa 8",
+                city: "64-331 Gryfów Wielkopolski",
+                phone: "Tel: (61) 892-11-00",
+                email: "E-mail: sekretariat@peteroflaw.pl"
+            },
+            lex: {
+                name: "Kancelaria Adwokacka „LEX & PARTNERZY”",
+                rep: "adw. Michał Nowosolowski",
+                street: "ul. Mickiewicza 14/2",
+                city: "64-331 Gryfów Wielkopolski",
+                phone: "Tel: (61) 892-12-34",
+                email: "E-mail: kontakt@lexpartnerzy.pl"
+            }
+        };
+
+        const presetRecipients = {
+            lex: {
+                header: "Adresat:",
+                name: "Kancelaria Adwokacka „LEX & PARTNERZY”",
+                rep: "adw. Michał Nowosolowski",
+                role: "Pełnomocnik Pana Tomasza Nieznanowskiego",
+                street: "ul. Mickiewicza 14/2",
+                city: "64-331 Gryfów Wielkopolski"
+            },
+            peter: {
+                header: "Adresat:",
+                name: "PETER OF LAW Sp.p.",
+                rep: "adw. Piotr Nowaźinski",
+                role: "",
+                street: "ul. Sądowa 8",
+                city: "64-331 Gryfów Wielkopolski"
+            }
+        };
+
+        function toggleSenderFields() {
+            const val = document.getElementById('senderSelect').value;
+            const box = document.getElementById('senderCustomBox');
+            box.style.display = (val === 'custom') ? 'block' : 'none';
+            updateDocument();
+        }
+
+        function toggleRecipientFields() {
+            const val = document.getElementById('recipientSelect').value;
+            const box = document.getElementById('recipientCustomBox');
+            box.style.display = (val === 'custom') ? 'block' : 'none';
+            updateDocument();
+        }
+
+        function validateLawyer() {
+            const lawyerInput = document.getElementById('lawyerInput').value.trim().toLowerCase();
+            const errorDiv = document.getElementById('lawyerError');
+            const forbidden = ['piotr nowodziński', 'piotr nowodzinski', 'michał nowosolski', 'michal nowosolski'];
+            if (forbidden.some(name => lawyerInput.includes(name))) {
+                errorDiv.style.display = 'block';
+                return false;
+            } else {
+                errorDiv.style.display = 'none';
+                return true;
+            }
+        }
+
+        function updateDocument() {
+            const sType = document.getElementById('senderSelect').value;
+            let sHtml = "";
+            if (sType === 'custom') {
+                const nameVal = document.getElementById('sName').value.trim();
+                const repVal = document.getElementById('sRep').value.trim();
+                const streetVal = document.getElementById('sStreet').value.trim();
+                const cityVal = document.getElementById('sCity').value.trim();
+                const phoneVal = document.getElementById('sPhone').value.trim();
+                const emailVal = document.getElementById('sEmail').value.trim();
+
+                if (nameVal) sHtml += `<strong style="font-size: 1.1em; color: #000;">${nameVal}</strong><br>`;
+                if (repVal) sHtml += `${repVal}<br>`;
+                if (streetVal || cityVal) sHtml += `${streetVal} ${cityVal}<br>`;
+                if (phoneVal || emailVal) {
+                    let contactParts = [];
+                    if (phoneVal) contactParts.push(phoneVal);
+                    if (emailVal) contactParts.push(emailVal);
+                    sHtml += `<span style="font-size: 0.85em; color: #444;">${contactParts.join(' | ')}</span>`;
+                }
+            } else {
+                const p = presetSenders[sType];
+                sHtml = `<strong style="font-size: 1.1em; color: #000;">${p.name}</strong><br>
+${p.rep}<br>
+${p.street}, ${p.city}<br>
+<span style="font-size: 0.85em; color: #444;">${p.phone} | ${p.email}</span>`;
+            }
+            document.getElementById('displaySender').innerHTML = sHtml;
+
+            const rType = document.getElementById('recipientSelect').value;
+            let rHtml = "";
+            if (rType === 'custom') {
+                const rNameVal = document.getElementById('rName').value.trim();
+                const rRepVal = document.getElementById('rRep').value.trim();
+                const rRoleVal = document.getElementById('rRole').value.trim();
+                const rStreetVal = document.getElementById('rStreet').value.trim();
+                const rCityVal = document.getElementById('rCity').value.trim();
+
+                rHtml += `<strong>Adresat:</strong><br>`;
+                if (rNameVal) rHtml += `<strong>${rNameVal}</strong><br>`;
+                if (rRepVal) rHtml += `<strong>${rRepVal}</strong><br>`;
+                if (rRoleVal) rHtml += `${rRoleVal}<br>`;
+                if (rStreetVal || rCityVal) rHtml += `${rStreetVal} ${rCityVal}`;
+            } else {
+                const r = presetRecipients[rType];
+                rHtml = `<strong>${r.header}</strong><br>
+<strong>${r.name}</strong><br>
+<strong>${r.rep}</strong><br>
+${r.role ? r.role + '<br>' : ''}
+${r.street}<br>
+${r.city}`;
+            }
+            document.getElementById('displayRecipient').innerHTML = rHtml;
+
+            document.getElementById('displayCityDate').innerText = document.getElementById('cityDateInput').value;
+            document.getElementById('displayLdz').innerText = document.getElementById('ldzInput').value;
+            document.getElementById('displayDotyczy').innerText = document.getElementById('dotyczyInput').value;
+            document.getElementById('displayTitle').innerText = document.getElementById('titleInput').value;
+            document.getElementById('displaySubtitle').innerText = document.getElementById('subtitleInput').value;
+            document.getElementById('displayContent').innerText = document.getElementById('contentEditor').value;
+            document.getElementById('displayLawyerName').innerText = document.getElementById('lawyerInput').value;
+            document.getElementById('displayLawyerDesc').innerText = document.getElementById('lawyerDescInput').value;
+            document.getElementById('displayAttachments').innerText = document.getElementById('attachmentsInput').value;
+        }
+
+        function generateSignature() {
+            const rawText = document.getElementById('lawyerInput').value;
+            const container = document.getElementById('signatureContainer');
+            container.innerHTML = '';
+
+            const chosenFont = handwritingFonts[Math.floor(Math.random() * handwritingFonts.length)];
+            const baseSize = Math.floor(Math.random() * 5) + 24;
+            const baseRotate = - (Math.floor(Math.random() * 5) + 2);
+
+            for (let i = 0; i < rawText.length; i++) {
+                const char = rawText[i];
+                if (char === ' ') {
+                    const space = document.createElement('span');
+                    space.style.width = '12px';
+                    space.style.display = 'inline-block';
+                    container.appendChild(space);
+                    continue;
+                }
+
+                const span = document.createElement('span');
+                span.className = 'sig-char';
+                span.innerText = char;
+
+                const microRotate = baseRotate + (Math.random() * 1.5 - 0.75);
+                const microY = Math.floor(Math.random() * 2);
+
+                span.style.fontFamily = `'${chosenFont}', cursive`;
+                span.style.fontSize = `${baseSize}px`;
+                span.style.transform = `rotate(${microRotate.toFixed(1)}deg) translateY(${microY}px)`;
+
+                container.appendChild(span);
+            }
+        }
+
+        function getCustomFileName(defaultName) {
+            let customName = document.getElementById('filenameInput').value.trim();
+            if (!customName) customName = defaultName;
+            customName = customName.replace(/\.[^/.]+$/, "");
+            return customName;
+        }
+
+        function exportHTML() {
+            const previewHtml = document.getElementById('previewArea').innerHTML;
+            const customTitle = document.getElementById('titleInput').value;
+
+            const fullDoc = `<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>${customTitle}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bad+Script&family=Caveat:wght@600&family=Dancing+Script:wght@700&family=Great+Vibes&family=Marck+Script&family=Meie+Script&family=Parisienne&family=Pinyon+Script&family=Sacramento&family=Tangerine:wght@700&family=Zeyada&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 20mm; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #000;
+            margin: 0;
+            background: #fff;
+            padding: 20mm;
+            box-sizing: border-box;
+        }
+        .document-preview {
+            background: #ffffff;
+            color: #000;
+            width: 100% !important;
+            max-width: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-height: none !important;
+            overflow: visible !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+        .doc-page {
+            font-size: 13.5px;
+            color: #000;
+        }
+        .header-left {
+            float: left;
+            width: 55%;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        .header-right {
+            float: right;
+            width: 40%;
+            text-align: right;
+            font-size: 0.9em;
+        }
+        .clearfix {
+            clear: both;
+        }
+        .recipient-box {
+            margin-left: 50%;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .doc-title-section {
+            text-align: center;
+            margin: 25px 0 20px 0;
+        }
+        .doc-main-title {
+            font-size: 1.25em;
+            font-weight: bold;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .doc-subtitle {
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .doc-content-body {
+            font-size: 0.93em;
+            line-height: 1.5;
+            text-align: justify;
+            white-space: pre-wrap;
+        }
+        .signature-section-wrapper {
+            margin-top: 35px;
+        }
+        .signature-block-right {
+            float: right;
+            width: 50%;
+            text-align: center;
+        }
+        .signature-line-draw {
+            border-bottom: 1px solid #000;
+            width: 80%;
+            margin: 0 auto 5px auto;
+            height: 50px;
+            position: relative;
+            line-height: 50px;
+            white-space: nowrap;
+        }
+        .sig-char {
+            display: inline-block;
+            color: #000080;
+            margin-right: -2px;
+            transform-origin: bottom center;
+        }
+        .attachments-box {
+            margin-top: 35px;
+            font-size: 0.8em;
+            color: #555;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="document-preview">
+        ${previewHtml}
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = getCustomFileName('pismo_procesowe') + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportPDF() {
+            const previewHtml = document.getElementById('previewArea').innerHTML;
+            const customTitle = getCustomFileName('pismo_procesowe');
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8"><title>${customTitle}</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Bad+Script&family=Caveat:wght@600&family=Dancing+Script:wght@700&family=Great+Vibes&family=Marck+Script&family=Meie+Script&family=Parisienne&family=Pinyon+Script&family=Sacramento&family=Tangerine:wght@700&family=Zeyada&display=swap" rel="stylesheet"><style>@page { size: A4; margin: 20mm; } body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #000; margin: 0; background: #fff; } .document-preview { background: #ffffff; color: #000; width: 100% !important; max-width: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-height: none !important; overflow: visible !important; display: flex; flex-direction: column; justify-content: space-between; } .doc-page { font-size: 13.5px; color: #000; } .header-left { float: left; width: 55%; font-size: 0.9em; line-height: 1.4; } .header-right { float: right; width: 40%; text-align: right; font-size: 0.9em; } .clearfix { clear: both; } .recipient-box { margin-left: 50%; margin-bottom: 25px; font-size: 0.95em; line-height: 1.4; } .doc-title-section { text-align: center; margin: 25px 0 20px 0; } .doc-main-title { font-size: 1.25em; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; } .doc-subtitle { font-size: 0.85em; font-style: italic; margin-top: 5px; } .doc-content-body { font-size: 0.93em; line-height: 1.5; text-align: justify; white-space: pre-wrap; } .signature-section-wrapper { margin-top: 35px; } .signature-block-right { float: right; width: 50%; text-align: center; } .signature-line-draw { border-bottom: 1px solid #000; width: 80%; margin: 0 auto 5px auto; height: 50px; position: relative; line-height: 50px; white-space: nowrap; } .sig-char { display: inline-block; color: #000080; margin-right: -2px; transform-origin: bottom center; } .attachments-box { margin-top: 35px; font-size: 0.8em; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }</style></head><body><div class="document-preview">${previewHtml}</div></body></html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        function exportJSON() {
+            const data = {
+                senderType: document.getElementById('senderSelect').value,
+                sName: document.getElementById('sName').value,
+                sRep: document.getElementById('sRep').value,
+                sStreet: document.getElementById('sStreet').value,
+                sCity: document.getElementById('sCity').value,
+                sPhone: document.getElementById('sPhone').value,
+                sEmail: document.getElementById('sEmail').value,
+                recipientType: document.getElementById('recipientSelect').value,
+                rName: document.getElementById('rName').value,
+                rRep: document.getElementById('rRep').value,
+                rRole: document.getElementById('rRole').value,
+                rStreet: document.getElementById('rStreet').value,
+                rCity: document.getElementById('rCity').value,
+                cityDate: document.getElementById('cityDateInput').value,
+                ldz: document.getElementById('ldzInput').value,
+                dotyczy: document.getElementById('dotyczyInput').value,
+                title: document.getElementById('titleInput').value,
+                subtitle: document.getElementById('subtitleInput').value,
+                lawyer: document.getElementById('lawyerInput').value,
+                lawyerDesc: document.getElementById('lawyerDescInput').value,
+                attachments: document.getElementById('attachmentsInput').value,
+                content: document.getElementById('contentEditor').value,
+                filename: document.getElementById('filenameInput').value
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = getCustomFileName('konfiguracja_pisma') + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.senderType) {
+                        document.getElementById('senderSelect').value = data.senderType;
+                        toggleSenderFields();
+                    }
+                    if (data.sName !== undefined) document.getElementById('sName').value = data.sName;
+                    if (data.sRep !== undefined) document.getElementById('sRep').value = data.sRep;
+                    if (data.sStreet !== undefined) document.getElementById('sStreet').value = data.sStreet;
+                    if (data.sCity !== undefined) document.getElementById('sCity').value = data.sCity;
+                    if (data.sPhone !== undefined) document.getElementById('sPhone').value = data.sPhone;
+                    if (data.sEmail !== undefined) document.getElementById('sEmail').value = data.sEmail;
+
+                    if (data.recipientType) {
+                        document.getElementById('recipientSelect').value = data.recipientType;
+                        toggleRecipientFields();
+                    }
+                    if (data.rName !== undefined) document.getElementById('rName').value = data.rName;
+                    if (data.rRep !== undefined) document.getElementById('rRep').value = data.rRep;
+                    if (data.rRole !== undefined) document.getElementById('rRole').value = data.rRole;
+                    if (data.rStreet !== undefined) document.getElementById('rStreet').value = data.rStreet;
+                    if (data.rCity !== undefined) document.getElementById('rCity').value = data.rCity;
+
+                    if (data.cityDate) document.getElementById('cityDateInput').value = data.cityDate;
+                    if (data.ldz) document.getElementById('ldzInput').value = data.ldz;
+                    if (data.dotyczy) document.getElementById('dotyczyInput').value = data.dotyczy;
+                    if (data.title) document.getElementById('titleInput').value = data.title;
+                    if (data.subtitle) document.getElementById('subtitleInput').value = data.subtitle;
+                    if (data.lawyer) document.getElementById('lawyerInput').value = data.lawyer;
+                    if (data.lawyerDesc) document.getElementById('lawyerDescInput').value = data.lawyerDesc;
+                    if (data.attachments) document.getElementById('attachmentsInput').value = data.attachments;
+                    if (data.content) document.getElementById('contentEditor').value = data.content;
+                    if (data.filename) document.getElementById('filenameInput').value = data.filename;
+
+                    validateLawyer();
+                    updateDocument();
+                    generateSignature();
+                    alert('Konfiguracja została pomyślnie wczytana!');
+                } catch (err) {
+                    alert('Błąd podczas parsowania pliku JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.onload = function() {
+            toggleSenderFields();
+            toggleRecipientFields();
+            updateDocument();
+            generateSignature();
+        };
+    </script>
 </body>
 </html>
